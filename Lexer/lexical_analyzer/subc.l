@@ -67,6 +67,61 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>"unsigned" {printf("KEY\t%s\n", yytext);}
 <CODE>"void" {printf("KEY\t%s\n", yytext);}
 <CODE>"while" {printf("KEY\t%s\n", yytext);}
+
+/* operator */
+/* 복합 연산자 */
+/* ==가 = 보다 먼저 매칭되어야 하기 때문에 위에 있음*/
+<CODE>"==" {printf("OP\t%s\n", yytext);}
+<CODE>"=" {printf("OP\t%s\n", yytext);}
+<CODE>"!=" {printf("OP\t%s\n", yytext);}
+<CODE>"<<=" {printf("OP\t%s\n", yytext);}
+<CODE>">>=" {printf("OP\t%s\n", yytext);}
+<CODE>"<<" {printf("OP\t%s\n", yytext);}
+<CODE>">>" {printf("OP\t%s\n", yytext);}
+<CODE>">=" {printf("OP\t%s\n", yytext);}
+<CODE>"<=" {printf("OP\t%s\n", yytext);}
+<CODE>"+=" {printf("OP\t%s\n", yytext);}
+<CODE>"-=" {printf("OP\t%s\n", yytext);}
+<CODE>"*=" {printf("OP\t%s\n", yytext);}
+<CODE>"/=" {printf("OP\t%s\n", yytext);}
+<CODE>"%=" {printf("OP\t%s\n", yytext);}
+<CODE>"&=" {printf("OP\t%s\n", yytext);}
+<CODE>"^=" {printf("OP\t%s\n", yytext);}
+<CODE>"|=" {printf("OP\t%s\n", yytext);}
+<CODE>"||" {printf("OP\t%s\n", yytext);}
+<CODE>"&&" {printf("OP\t%s\n", yytext);}
+<CODE>"++" {printf("OP\t%s\n", yytext);}
+<CODE>"--" {printf("OP\t%s\n", yytext);}
+<CODE>".." {printf("OP\t%s\n", yytext);}
+<CODE>"->" {printf("OP\t%s\n", yytext);}
+
+/* 단일 연산자 */
+<CODE>"\" {printf("OP\t%s\n", yytext);}
+<CODE>"!" {printf("OP\t%s\n", yytext);}
+<CODE>"~" {printf("OP\t%s\n", yytext);}
+<CODE>"*" {printf("OP\t%s\n", yytext);}
+<CODE>"/" {printf("OP\t%s\n", yytext);}
+<CODE>"%" {printf("OP\t%s\n", yytext);}
+<CODE>"+" {printf("OP\t%s\n", yytext);}
+<CODE>"-" {printf("OP\t%s\n", yytext);}
+<CODE>">" {printf("OP\t%s\n", yytext);}
+<CODE>"<" {printf("OP\t%s\n", yytext);}
+<CODE>"&" {printf("OP\t%s\n", yytext);}
+<CODE>"^" {printf("OP\t%s\n", yytext);}
+<CODE>"|" {printf("OP\t%s\n", yytext);}
+<CODE>"?" {printf("OP\t%s\n", yytext);}
+<CODE>":" {printf("OP\t%s\n", yytext);}
+<CODE>";" {printf("OP\t%s\n", yytext);}
+<CODE>"," {printf("OP\t%s\n", yytext);}
+<CODE>"." {printf("OP\t%s\n", yytext);}
+
+/* 괄호 */
+<CODE>"(" {printf("OP\t%s\n", yytext);}
+<CODE>")" {printf("OP\t%s\n", yytext);}
+<CODE>"{" {printf("OP\t%s\n", yytext);}
+<CODE>"}" {printf("OP\t%s\n", yytext);}
+<CODE>"[" {printf("OP\t%s\n", yytext);}
+<CODE>"]" {printf("OP\t%s\n", yytext);}
 %%
 
 int main (int argc, char** argv)
