@@ -24,22 +24,19 @@
 int commentdepth=0;
 %}
 
-letter      [A-Za-z_]
+letter      [A-Za-z_] 
 digit       [0-9]
 id  		{letter}({letter}|{digit})*
-op1         [+-=]
-op2 		(\(|\)|\{|\}|\;)
-operator	{op1}|{op2}
 whitespace	[ \t\n]+
+
 integer-constant -?{digit}+
-float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
+float-constant -?{digit}+\.{digit}+([eE][+-]?{digit}+)?
 
 /* CODE 모드와 COMMENT 모드로 나뉘어져 있음. */
 %start CODE COMMENT
 
 %%
-/* Keywords! */
-<CODE>"auto" {printf("KEY\t%s\n", yytext);}
+<CODE>"auto" {printf("KEY\t%s\n", yytext);} //keywords
 <CODE>"break" {printf("KEY\t%s\n", yytext);}
 <CODE>"case" {printf("KEY\t%s\n", yytext);}
 <CODE>"char" {printf("KEY\t%s\n", yytext);}
@@ -68,10 +65,7 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>"void" {printf("KEY\t%s\n", yytext);}
 <CODE>"while" {printf("KEY\t%s\n", yytext);}
 
-/* operator */
-/* 복합 연산자 */
-/* ==가 = 보다 먼저 매칭되어야 하기 때문에 위에 있음*/
-<CODE>"==" {printf("OP\t%s\n", yytext);}
+<CODE>"==" {printf("OP\t%s\n", yytext);} // 복합 연산자
 <CODE>"=" {printf("OP\t%s\n", yytext);}
 <CODE>"!=" {printf("OP\t%s\n", yytext);}
 <CODE>"<<=" {printf("OP\t%s\n", yytext);}
@@ -92,11 +86,10 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>"&&" {printf("OP\t%s\n", yytext);}
 <CODE>"++" {printf("OP\t%s\n", yytext);}
 <CODE>"--" {printf("OP\t%s\n", yytext);}
-<CODE>".." {printf("OP\t%s\n", yytext);}
+<CODE>".."/{digit} {printf("OP\t%s\n", yytext);}
 <CODE>"->" {printf("OP\t%s\n", yytext);}
 
-/* 단일 연산자 */
-<CODE>"\" {printf("OP\t%s\n", yytext);}
+<CODE>"\\" {printf("OP\t%s\n", yytext);} // 단일 연산자
 <CODE>"!" {printf("OP\t%s\n", yytext);}
 <CODE>"~" {printf("OP\t%s\n", yytext);}
 <CODE>"*" {printf("OP\t%s\n", yytext);}
@@ -115,8 +108,7 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>"," {printf("OP\t%s\n", yytext);}
 <CODE>"." {printf("OP\t%s\n", yytext);}
 
-/* 괄호 */
-<CODE>"(" {printf("OP\t%s\n", yytext);}
+<CODE>"(" {printf("OP\t%s\n", yytext);} // 괄호
 <CODE>")" {printf("OP\t%s\n", yytext);}
 <CODE>"{" {printf("OP\t%s\n", yytext);}
 <CODE>"}" {printf("OP\t%s\n", yytext);}
@@ -124,7 +116,7 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>"]" {printf("OP\t%s\n", yytext);}
 
 
-/* 상수 및 id, whitespace 처리 */
+
 <CODE>{integer-constant}	{printf("INT\t%s\n", yytext);}
 <CODE>{float-constant}	{printf("F\t%s\n", yytext);}
 
@@ -132,7 +124,7 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>{whitespace} ; //아무것도 하면 안 됨
 
 
-/* 중첩 주석 (주석 속 주석) */
+
 <CODE>"/*" {
 	commentdepth = 1;
 	BEGIN COMMENT;
@@ -146,7 +138,7 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 		BEGIN CODE;
 	}
 }
-<COMMENT> .|\n ; // 주석 내부에서 이 문자들 무시 
+<COMMENT>(.|\n) ;
 %%
 
 int main (int argc, char** argv)
