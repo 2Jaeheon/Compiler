@@ -38,7 +38,35 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 %start CODE COMMENT
 
 %%
-/* 이 곳에 Rules를 넣으면 됨*/
+/* Keywords! */
+<CODE>"auto" {printf("KEY\t%s\n", yytext);}
+<CODE>"break" {printf("KEY\t%s\n", yytext);}
+<CODE>"case" {printf("KEY\t%s\n", yytext);}
+<CODE>"char" {printf("KEY\t%s\n", yytext);}
+<CODE>"continue" {printf("KEY\t%s\n", yytext);}
+<CODE>"default" {printf("KEY\t%s\n", yytext);}
+<CODE>"do" {printf("KEY\t%s\n", yytext);}
+<CODE>"double" {printf("KEY\t%s\n", yytext);}
+<CODE>"else" {printf("KEY\t%s\n", yytext);}
+<CODE>"extern" {printf("KEY\t%s\n", yytext);}
+<CODE>"float" {printf("KEY\t%s\n", yytext);}
+<CODE>"for" {printf("KEY\t%s\n", yytext);}
+<CODE>"goto" {printf("KEY\t%s\n", yytext);}
+<CODE>"if" {printf("KEY\t%s\n", yytext);}
+<CODE>"int" {printf("KEY\t%s\n", yytext);}
+<CODE>"long" {printf("KEY\t%s\n", yytext);}
+<CODE>"register" {printf("KEY\t%s\n", yytext);}
+<CODE>"return" {printf("KEY\t%s\n", yytext);}
+<CODE>"short" {printf("KEY\t%s\n", yytext);}
+<CODE>"sizeof" {printf("KEY\t%s\n", yytext);}
+<CODE>"static" {printf("KEY\t%s\n", yytext);}
+<CODE>"struct" {printf("KEY\t%s\n", yytext);}
+<CODE>"switch" {printf("KEY\t%s\n", yytext);}
+<CODE>"typedef" {printf("KEY\t%s\n", yytext);}
+<CODE>"union" {printf("KEY\t%s\n", yytext);}
+<CODE>"unsigned" {printf("KEY\t%s\n", yytext);}
+<CODE>"void" {printf("KEY\t%s\n", yytext);}
+<CODE>"while" {printf("KEY\t%s\n", yytext);}
 %%
 
 int main (int argc, char** argv)
