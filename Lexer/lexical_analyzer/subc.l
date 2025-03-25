@@ -131,6 +131,22 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>{id} {printf("ID\t%s\n", yytext);}
 <CODE>{whitespace} ; //아무것도 하면 안 됨
 
+
+/* 중첩 주석 (주석 속 주석) */
+<CODE>"/*" {
+	commentdepth = 1;
+	BEGIN COMMENT;
+}
+<COMMENT>"/*" {
+	commentdepth++;
+}
+<COMMENT>"*/" {
+	commentdepth--;
+	if(commentdepth == 0){
+		BEGIN CODE;
+	}
+}
+<COMMENT> .|\n ; // 주석 내부에서 이 문자들 무시 
 %%
 
 int main (int argc, char** argv)
