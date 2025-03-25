@@ -122,6 +122,15 @@ float-constant -?{digit}+.{digit}*((eE)[+-]?{digit}+)?
 <CODE>"}" {printf("OP\t%s\n", yytext);}
 <CODE>"[" {printf("OP\t%s\n", yytext);}
 <CODE>"]" {printf("OP\t%s\n", yytext);}
+
+
+/* 상수 및 id, whitespace 처리 */
+<CODE>{integer-constant}	{printf("INT\t%s\n", yytext);}
+<CODE>{float-constant}	{printf("F\t%s\n", yytext);}
+
+<CODE>{id} {printf("ID\t%s\n", yytext);}
+<CODE>{whitespace} ; //아무것도 하면 안 됨
+
 %%
 
 int main (int argc, char** argv)
