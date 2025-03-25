@@ -811,7 +811,7 @@ YY_DECL
 		}
 
 	{
-#line 40 "subc.l"
+#line 38 "subc.l"
 
 #line 817 "lex.yy.c"
 
@@ -872,247 +872,247 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 41 "subc.l"
+#line 39 "subc.l"
 {printf("KEY\t%s\n", yytext);} //keywords
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 42 "subc.l"
+#line 40 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 43 "subc.l"
+#line 41 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 44 "subc.l"
+#line 42 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 45 "subc.l"
+#line 43 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 46 "subc.l"
+#line 44 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 47 "subc.l"
+#line 45 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 48 "subc.l"
+#line 46 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 49 "subc.l"
+#line 47 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 50 "subc.l"
+#line 48 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 51 "subc.l"
+#line 49 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 52 "subc.l"
+#line 50 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 53 "subc.l"
+#line 51 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 54 "subc.l"
+#line 52 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 55 "subc.l"
+#line 53 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 56 "subc.l"
+#line 54 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 57 "subc.l"
+#line 55 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 58 "subc.l"
+#line 56 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 59 "subc.l"
+#line 57 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 60 "subc.l"
+#line 58 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 61 "subc.l"
+#line 59 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 62 "subc.l"
+#line 60 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 63 "subc.l"
+#line 61 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 64 "subc.l"
+#line 62 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 65 "subc.l"
+#line 63 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 66 "subc.l"
+#line 64 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 67 "subc.l"
+#line 65 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 68 "subc.l"
+#line 66 "subc.l"
 {printf("KEY\t%s\n", yytext);}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 70 "subc.l"
+#line 68 "subc.l"
 {printf("OP\t%s\n", yytext);} // 복합 연산자
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 71 "subc.l"
+#line 69 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 72 "subc.l"
+#line 70 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 73 "subc.l"
+#line 71 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 74 "subc.l"
+#line 72 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 75 "subc.l"
+#line 73 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 76 "subc.l"
+#line 74 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 77 "subc.l"
+#line 75 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 78 "subc.l"
+#line 76 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 79 "subc.l"
+#line 77 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 80 "subc.l"
+#line 78 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 81 "subc.l"
+#line 79 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 82 "subc.l"
+#line 80 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 83 "subc.l"
+#line 81 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 84 "subc.l"
+#line 82 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 85 "subc.l"
+#line 83 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 86 "subc.l"
+#line 84 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 87 "subc.l"
+#line 85 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 88 "subc.l"
+#line 86 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 89 "subc.l"
+#line 87 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 90 "subc.l"
+#line 88 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 50:
@@ -1120,158 +1120,158 @@ case 50:
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 91 "subc.l"
+#line 89 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 92 "subc.l"
+#line 90 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 94 "subc.l"
+#line 92 "subc.l"
 {printf("OP\t%s\n", yytext);} // 단일 연산자
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 95 "subc.l"
+#line 93 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 96 "subc.l"
+#line 94 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 97 "subc.l"
+#line 95 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 98 "subc.l"
+#line 96 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 99 "subc.l"
+#line 97 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 100 "subc.l"
+#line 98 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 101 "subc.l"
+#line 99 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 102 "subc.l"
+#line 100 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 103 "subc.l"
+#line 101 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 104 "subc.l"
+#line 102 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 105 "subc.l"
+#line 103 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 106 "subc.l"
+#line 104 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 107 "subc.l"
+#line 105 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 108 "subc.l"
+#line 106 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 109 "subc.l"
+#line 107 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 110 "subc.l"
+#line 108 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 111 "subc.l"
+#line 109 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 113 "subc.l"
+#line 111 "subc.l"
 {printf("OP\t%s\n", yytext);} // 괄호
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 114 "subc.l"
+#line 112 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 115 "subc.l"
+#line 113 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 116 "subc.l"
+#line 114 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 117 "subc.l"
+#line 115 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 118 "subc.l"
+#line 116 "subc.l"
 {printf("OP\t%s\n", yytext);}
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 122 "subc.l"
+#line 120 "subc.l"
 {printf("INT\t%s\n", yytext);}
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 123 "subc.l"
+#line 121 "subc.l"
 {printf("F\t%s\n", yytext);}
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 125 "subc.l"
+#line 123 "subc.l"
 {printf("ID\t%s\n", yytext);}
 	YY_BREAK
 case 79:
 /* rule 79 can match eol */
 YY_RULE_SETUP
-#line 126 "subc.l"
+#line 124 "subc.l"
 ; //아무것도 하면 안 됨
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 130 "subc.l"
+#line 128 "subc.l"
 {
 	commentdepth = 1;
 	BEGIN COMMENT;
@@ -1279,14 +1279,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 134 "subc.l"
+#line 132 "subc.l"
 {
 	commentdepth++;
 }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 137 "subc.l"
+#line 135 "subc.l"
 {
 	commentdepth--;
 	if(commentdepth == 0){
@@ -1297,12 +1297,12 @@ YY_RULE_SETUP
 case 83:
 /* rule 83 can match eol */
 YY_RULE_SETUP
-#line 143 "subc.l"
+#line 141 "subc.l"
 ;
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 144 "subc.l"
+#line 142 "subc.l"
 ECHO;
 	YY_BREAK
 #line 1309 "lex.yy.c"
@@ -2312,7 +2312,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 144 "subc.l"
+#line 142 "subc.l"
 
 
 int main (int argc, char** argv)
