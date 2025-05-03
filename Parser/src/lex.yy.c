@@ -351,8 +351,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 47
-#define YY_END_OF_BUFFER 48
+#define YY_NUM_RULES 46
+#define YY_END_OF_BUFFER 47
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -362,7 +362,7 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[99] =
     {   0,
-        0,    0,   48,   46,   44,   45,   35,   46,   33,   36,
+        0,    0,   47,   46,   44,   45,   35,   46,   33,   36,
        46,   37,   38,   31,   29,   28,   30,   43,   32,   24,
        24,   27,   16,   34,   18,   23,   23,   39,   40,   23,
        23,   23,   23,   23,   23,   23,   23,   41,   46,   42,
@@ -513,7 +513,7 @@ char *yytext;
 /*                                                                          */
 /* Course       : Compiler                                                  */
 /*                                                                          */
-#line 12 "subc.l"
+#line 9 "subc.l"
 /* C Code Section */
 /* Any code placed inside the brackets will be literally copied into the generated C file. */
 
@@ -740,9 +740,9 @@ YY_DECL
 		}
 
 	{
-#line 29 "subc.l"
+#line 26 "subc.l"
 
-#line 31 "subc.l"
+#line 28 "subc.l"
   /* Rules Section */
   /* This section contains series of rules for recognizing tokens. */
 
@@ -806,248 +806,248 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 35 "subc.l"
+#line 32 "subc.l"
 { return TYPE; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 36 "subc.l"
-{ return TYPE; }
+#line 33 "subc.l"
+{return TYPE; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 37 "subc.l"
+#line 34 "subc.l"
 { return STRUCT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 38 "subc.l"
+#line 35 "subc.l"
 { return SYM_NULL; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 39 "subc.l"
+#line 36 "subc.l"
 { return RETURN; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 40 "subc.l"
+#line 37 "subc.l"
 { return IF; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 41 "subc.l"
+#line 38 "subc.l"
 { return ELSE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 42 "subc.l"
+#line 39 "subc.l"
 { return WHILE; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 43 "subc.l"
+#line 40 "subc.l"
 { return FOR; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 44 "subc.l"
+#line 41 "subc.l"
 { return BREAK; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 45 "subc.l"
+#line 42 "subc.l"
 { return CONTINUE; } 
 	YY_BREAK
 /* 논리 연산자 Logical Operators */
 case 12:
 YY_RULE_SETUP
-#line 48 "subc.l"
-{ return LOGICAL_OR; }
+#line 47 "subc.l"
+{return LOGICAL_OR; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 49 "subc.l"
-{ return LOGICAL_AND; }
+#line 48 "subc.l"
+{return LOGICAL_AND; }
 	YY_BREAK
 /* 관계 연산자 Relational Operators */
 case 14:
 YY_RULE_SETUP
-#line 52 "subc.l"
+#line 51 "subc.l"
 { return EQUOP; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 53 "subc.l"
+#line 52 "subc.l"
 { return EQUOP; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 54 "subc.l"
+#line 53 "subc.l"
 { return RELOP; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 55 "subc.l"
+#line 54 "subc.l"
 { return RELOP; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 56 "subc.l"
+#line 55 "subc.l"
 { return RELOP; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 57 "subc.l"
+#line 56 "subc.l"
 { return RELOP; }
 	YY_BREAK
 /* 증감 연산자 */
 case 20:
 YY_RULE_SETUP
-#line 60 "subc.l"
+#line 58 "subc.l"
 { return INCOP; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 61 "subc.l"
+#line 59 "subc.l"
 { return DECOP; }
 	YY_BREAK
 /* 화살표 연산자 */
 case 22:
 YY_RULE_SETUP
-#line 64 "subc.l"
+#line 62 "subc.l"
 { return STRUCTOP; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 66 "subc.l"
+#line 64 "subc.l"
 { return ID; }
 	YY_BREAK
 /* Integer constants */
 case 24:
 YY_RULE_SETUP
-#line 69 "subc.l"
-{ return INTEGER_CONST; }
+#line 67 "subc.l"
+{
+                                  return INTEGER_CONST;
+                                }
 	YY_BREAK
 /* String variables */
 case 25:
 YY_RULE_SETUP
 #line 72 "subc.l"
-{ return STRING; }
+{
+                                  return STRING;
+                                }
 	YY_BREAK
 /* Character variables */
 case 26:
 YY_RULE_SETUP
-#line 75 "subc.l"
-{ return CHAR_CONST; }
+#line 77 "subc.l"
+{    
+                                  return CHAR_CONST;
+                                }
 	YY_BREAK
 /* Operators */
 case 27:
 YY_RULE_SETUP
-#line 78 "subc.l"
+#line 82 "subc.l"
 { return ';'; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 79 "subc.l"
+#line 83 "subc.l"
 { return ','; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 80 "subc.l"
+#line 84 "subc.l"
 { return '+'; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 81 "subc.l"
+#line 85 "subc.l"
 { return '-'; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 82 "subc.l"
+#line 86 "subc.l"
 { return '*'; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 83 "subc.l"
+#line 87 "subc.l"
 { return '/'; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 84 "subc.l"
+#line 88 "subc.l"
 { return '%'; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 85 "subc.l"
+#line 89 "subc.l"
 { return '='; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 86 "subc.l"
+#line 90 "subc.l"
 { return '!'; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 87 "subc.l"
+#line 91 "subc.l"
 { return '&'; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 88 "subc.l"
+#line 92 "subc.l"
 { return '('; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 89 "subc.l"
+#line 93 "subc.l"
 { return ')'; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 90 "subc.l"
+#line 94 "subc.l"
 { return '['; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 91 "subc.l"
+#line 95 "subc.l"
 { return ']'; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 92 "subc.l"
+#line 96 "subc.l"
 { return '{'; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 93 "subc.l"
+#line 97 "subc.l"
 { return '}'; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 94 "subc.l"
+#line 98 "subc.l"
 { return '.'; }
 	YY_BREAK
 /* Whitespaces */
 case 44:
 YY_RULE_SETUP
-#line 97 "subc.l"
+#line 101 "subc.l"
 { /* 공백 무시 */ }
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 98 "subc.l"
+#line 102 "subc.l"
 { /* 줄바꿈 처리 */ }
 	YY_BREAK
-/* 다른 모든 문자는 에러로 처리 */
 case 46:
 YY_RULE_SETUP
-#line 101 "subc.l"
-{ printf("Invalid character: %c\n", yytext[0]); }
-	YY_BREAK
-case 47:
-YY_RULE_SETUP
-#line 103 "subc.l"
+#line 105 "subc.l"
 ECHO;
 	YY_BREAK
 #line 1054 "lex.yy.c"
@@ -2055,7 +2055,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 103 "subc.l"
+#line 105 "subc.l"
 
    
 /* User Code Section */
@@ -2079,3 +2079,4 @@ int main(int argc, char* argv[]) {
   
   return 0;
 }
+

@@ -1,6 +1,3 @@
-name: "fixed-subc-l"
-type: "application/vnd.ant.code"
-language: "lex"
 /*                                                                          */
 /* File Name    : subc.l                                                    */
 /* Description  : a skeleton flex input                                     */
@@ -31,21 +28,23 @@ special_char  \\[nt]
   /* This section contains series of rules for recognizing tokens. */
 
   /* Keywords */
-"int"                  { return TYPE; }
-"char"                 { return TYPE; }
-"struct"               { return STRUCT; }
-"NULL"                 { return SYM_NULL; }
-"return"               { return RETURN; }
-"if"                   { return IF; }
-"else"                 { return ELSE; }
-"while"                { return WHILE; }
-"for"                  { return FOR; }
-"break"                { return BREAK; }
-"continue"             { return CONTINUE; } 
+"int"  { return TYPE; }
+"char"  {return TYPE; }
+"struct"  { return STRUCT; }
+"NULL"  { return SYM_NULL; }
+"return"  { return RETURN; }
+"if"  { return IF; }
+"else"  { return ELSE; }
+"while"  { return WHILE; }
+"for" { return FOR; }
+"break" { return BREAK; }
+"continue"  { return CONTINUE; } 
+
+
 
   /* 논리 연산자 Logical Operators */
-"||"                   { return LOGICAL_OR; }
-"&&"                   { return LOGICAL_AND; }
+"||"  {return LOGICAL_OR; }
+"&&"  {return LOGICAL_AND; }
 
   /* 관계 연산자 Relational Operators */
 "=="                   { return EQUOP; }
@@ -56,22 +55,28 @@ special_char  \\[nt]
 ">="                   { return RELOP; }
 
   /* 증감 연산자 */
-"++"                   { return INCOP; }
-"--"                   { return DECOP; }
+"++"  { return INCOP; }
+"--"  { return DECOP; }
 
   /* 화살표 연산자 */
-"->"                   { return STRUCTOP; }
+"->"  { return STRUCTOP; }
 
 {letter}({letter}|{digit})*  { return ID; }
 
   /* Integer constants */
-{integer_const}        { return INTEGER_CONST; }
+{integer_const}                 {
+                                  return INTEGER_CONST;
+                                }
 
   /* String variables */
-\"({special_char}|[^\\\"\n])*\"  { return STRING; }
+\"({special_char}|[^\\\"\n])*\" {
+                                  return STRING;
+                                }
 
   /* Character variables */
-'({special_char}|[^\\'\n])'  { return CHAR_CONST; }
+'({special_char}|[^\\'\n])'     {    
+                                  return CHAR_CONST;
+                                }
 
   /* Operators */
 ";"                    { return ';'; }
@@ -96,8 +101,6 @@ special_char  \\[nt]
 {whitespace}+          { /* 공백 무시 */ }
 \n                     { /* 줄바꿈 처리 */ }
 
-  /* 다른 모든 문자는 에러로 처리 */
-.                      { printf("Invalid character: %c\n", yytext[0]); }
 
 %%
    
