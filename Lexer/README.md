@@ -1,256 +1,241 @@
-# 프로젝트 개요
-Lex(Flex)와 Yacc(Bison)를 이용하여 C 언어의 파서를 구현.
-C 코드가 주어졌을 때, 해당 코드가 문법적으로 올바른지 판단하고,
-그 판단 과정을 reduce 로그로 출력하는 시스템을 구현.
+# Lexer
 
-# 전체적인 동작 과정
-- C언어로 작성된 파일을 Parser에 입력
-- main() 함수에서 파일을 열어 yyin을 통해서 입력 소스를 지정
-- yylex() 또는 yyparse() 함수 호출로 분석 시작
-- Yacc는 입력에 따라 어떤 토큰이 필요한지를 판단하고, 그때마다 Lex의 yylex()를 호출
-- 그러면 Lex는 실제 입력 문자열을 분석하여 해당 토큰을 반환
-- Yacc은 Lex에게 받은 토큰을 가지고 Shift를 할지 Reduce를 할지 판단
-- Reduce가 일어날 때마다 로그를 출력
+# 1. 준비
 
-즉, 다음과 같은 과정을 진행함.
-1.	어휘 분석기(Lex)가 C 코드를 읽어 토큰(token)으로 전환
-2.	구문 분석기(Yacc)가 토큰 시퀀스를 읽어 문법 구조를 생성
-3.	reduce가 일어날 때마다 해당 문법 구조를 로그로 출력
-```
-[C 코드 입력]
-    ↓
-Lex (Flex) – 토큰화
-    ↓
-Yacc (Bison) – 문법 분석, reduce 로그 출력
-```
+##  개발 환경 세팅
 
-# 문법 구조 (Grammer)
-먼저 이 과제를 구현하기 위해서는 Grammer에 대한 사전 이해를 하는 것이 도움이 됩니다. 따라서 문법 구조에 대해서 먼저 짚고 넘어갑니다.
+- Jcloud 환경
+- Ubuntu 24.04
+- flex, gcc 설치
+- VSCode에서 SSH 연결해서 코드 작성
 
-Grammer: 입력된 C 코드가 문법적으로 올바른지 판별을 하는 기준
+##  학습
 
-Grammer는 다음과 같이 큰 논리적인 개념으로 나뉩니다
-```
-program
- └── ext_def_list
-       ├── ext_def (변수 선언, 함수 정의, 구조체 정의)
-              ├── type_specifier (int, char 등)
-              ├── pointers (포인터)
-              ├── ID, 배열 등
-              └── func_decl compound_stmt (함수 정의)
+- 프로그래밍 언어의 문법적 특성을 파악
+- lex 사용방법에 관해 학습
+- 기존 C언어에 더해서 새로운 요구사항 학습
+    - 1 .. 50 == 1~50을 의미함.
+    - /* */ 주석 사이에 /* */를 넣을 수 있어야 함.
+
+#  2. Lex 기본 구조 만들기
+
+Lex 프로그램은 크게 세 가지의 Section으로 구성되어있음.
+
+```cpp
+%{ ... %}    // C 코드 삽입 (전역 변수나 include 등)
+%%
+...          // Lex 정규식 + 동작 정의
+%%
+main()       // 실행 시작 함수
 ```
 
-### 이해를 위 한 각 용어들
-| **문법 요소**      | **역할 (기능)**       | **설명**                                    |
-| -------------- | ----------------- | ----------------------------------------- |
-| program        | 프로그램의 시작점         | 하나의 C 프로그램 전체를 표현하는 최상위 단위                |
-| ext_def_list   | 외부 정의들의 나열        | 여러 개의 전역 정의(함수, 변수, 구조체 등)를 연속적으로 배치하는 구조 |
-| ext_def        | 외부 정의 단위          | 함수 정의, 전역 변수 선언, 구조체 정의 등을 하나씩 표현         |
-| type_specifier | 자료형 정의            | int, char, struct 등 타입을 지정하는 구성요소         |
-| pointers       | 포인터 여부 지정         | 변수나 매개변수가 포인터인지 여부를 표현                    |
-| func_decl      | 함수 선언부            | 함수의 이름, 반환형, 인자 등을 정의하는 부분                |
-| param_list     | 함수 인자 목록          | 함수에 전달되는 여러 개의 인자들을 순차적으로 표현              |
-| param_decl     | 하나의 함수 인자 선언      | 각각의 인자에 대한 타입, 이름, 포인터 여부 등을 포함           |
-| compound_stmt  | 중괄호 블록            | 여러 문장과 선언이 포함된 코드 블록. 함수 몸체나 제어문에서 사용     |
-| def_list       | 지역 변수 선언들의 모음     | 블록 안에서 선언되는 여러 변수들을 순차적으로 표현              |
-| def            | 하나의 지역 변수 선언      | 단일 변수 또는 배열의 선언을 의미                       |
-| stmt_list      | 문장들의 나열           | 여러 개의 실행 문장을 순차적으로 처리하는 리스트 구조            |
-| stmt           | 하나의 실행 문장         | 대입, 조건문, 반복문, return 등 실행 가능한 한 문장을 표현    |
-| expr           | 표현식               | 연산, 대입, 비교 등 결과를 산출하는 계산식 표현              |
-| binary         | 이항 연산 표현식         | 두 값을 이용한 연산 (산술, 논리, 비교 등)을 표현            |
-| unary          | 단항 표현식 및 최소 단위 표현 | 상수, 변수, 배열/구조체 접근, 함수 호출 등 가장 기본적인 표현 단위  |
-| args           | 함수 호출 시의 인자 목록    | 함수에 실제로 전달되는 여러 개의 인자 표현                  |
-| expr_e         | 선택적 표현식           | 비워둘 수 있는 표현식 (주로 for 루프에서 사용)             |
+-  subc.l 기본 구조 작성
+- main() 함수에서 yylex()를 호출하도록 함
+- 상태 선언 (%start AA BB)
 
+###  구조
 
-#### Program - 프로그램
-이는 프로그램의 시작점으로 ext_def_list가 몸체를 담당함
+- **Definition Section** (%{ %}): 헤더 및 전역변수
+- **Rules Section** (%% ... %%): 각 토큰별 정규표현식과 동작을 정의
+- **User Code Section:** main() 함수를 작
 
-#### ext_def_list - 외부 정의 리스트
+#  3. Regular Expression and Basic Token
+
+Regular Expression을 통해 문자를 인식하고, 인식된 문자열(lexeme)에 따라서 동작을 지정해줄 수 있음.
+
+다음의 예를 보면 하나 이상의 변수를 인식하는 경우 이에 대해서 ID로 출력해주는 것! 여기서 yytext는 매칭된 문자열 자체를 담고있는 전역변수로 lex가 제공해줌.
+
+```cpp
+[a-zA-Z_][a-zA-Z0-9_]*   { printf("ID\t%s\n", yytext); }
 ```
-ext_def_list : ext_def_list ext_def
-             | %empty ;
+
+### 해야할 일
+
+-  모든 **keyword**, **identifier**, **operator**, **number**, **whitespace**에 대해 **정규표현식**을 정의.
+- 우선순위에 주의해서 순서를 정함. (e.g., keyword가 identifier보다 먼저)
+- yytext를 이용해 적절한 lexeme을 출력하도록 함.
+
+> Compiler는 왼쪽에서 오른쪽으로 앞에서부터 순서대로 읽어감. 여러 개의 Regular Expression중 가장 먼저 매칭되는 규칙을 찾음. 만약 여러 개가 매칭되는 경우 더 긴 문자열이 우선이며, 그 중에서도 먼저 정의된 규칙(위)가 우선임.
+
+다음의 순서대로 정규표현식을 정의하자~!
+
+1. **Keywords (키워드)**
+2. **Operators / Delimiters (연산자, 구분자)**
+3. **Number (숫자: 정수, 실수)**
+4. **Identifier (식별자)**
+5. **Whitespace (공백)**
+6. **Comments (주석)** → Start condition 따로 처리 (주석 모드로 전환)
+
+### 정수와 실수 처리
+
+INT와 FLOAT 구분해서 인식
+
+```cpp
+<INITIAL>{float_const}   { printf("F\t%s\n", yytext); }
+<INITIAL>{int_const}     { printf("INT\t%s\n", yytext); }
 ```
-외부 정의 리스트로 여러개의 ext_def가 처리가 가능 <br>
-%empty는 epsilon으로 정의가 하나도 없는 경우를 나타냄
 
-#### ext_def - 외부 정의
+- > 1.  → 허용
+- > .5 → 허용 안됨
+- > 1..5 → INT + OP + INT 로 해석해야 함
+
+
+
+# 4. 중첩 주석 처리
+
+###  /* ... */ 안에 또 다른 주석이 들어가는 주석을 처리
+
+Lex는 StartCondition을 통해서 상태 전환이 가능함.
+
+예를들어서 `/*` 을 만나는 경우 `BEGIN(COMMENT);` 를 통해서 주석으로 들어가고 `depth++` 로 깊이를 하나 증가시킴. 또한, `*/` 를 만나는 경우 `depth--` 로 depth를 감소시킴. 또한, `depth == 0` 일 때 `BEGIN(CODE)`로 복귀함.
+
+```cpp
+<NORMAL>"/*" {
+    commentdepth = 1;
+    BEGIN COMMENT;
+}
+<COMMENT>"/*" {
+    commentdepth++;
+}
+<COMMENT>"*/" {
+    commentdepth--;
+    if (commentdepth == 0)
+        BEGIN NORMAL;
+}
+<COMMENT>.|\n ;
 ```
-ext_def : type_specifier pointers ID ';'
-        | type_specifier pointers ID '[' INTEGER_CONST ']' ';'
-        | STRUCT ID '{' def_list '}' ';'
-        | func_decl compound_stmt ;
+
+#  5. `..` 연산자 처리
+
+1 . . 5 ← 이걸 뭘로 나눌까? → Lex에서는 두 가지경우가 존재함. 이걸 정확히 분리해줘야함.
+
+-  "1." + ".5"? -> 오류!
+- "1" + ".." + "5"? -> 우리가 원하는 것
+
+### Lookahead
+
+- 1..5는 INT .. INT로 인식
+- float와 헷갈리지 않도록 . + 숫자는 실수로, ..은 연산자로 구분
+- 이 과정에서 lookahead 기법을 사용해야함. 즉, `.` 뒤에 또 다른 `.`이 나오는지를 확인해야함.
+
+```cpp
+".."/[0-9]     { printf("OP\t%s\n", yytext); } // range operator
+[0-9]+"."[0-9]*([eE][+-]?[0-9]+)?/[^.]    { printf("FLOAT\t%s\n", yytext); } // float
+-?[0-9]+                 { printf("INT\t%s\n", yytext); } // integer
 ```
-외부 정의로서 다음과 같은 요소들을 나타냄. <br>
-이 문법들이 실제로 가장 많이 reduce 됨
-- 변수 선언 
-- 배열 선언
-- 구조체 정의
-- 함수 정의 
 
-#### type_specifier – 타입 지정자
+or (아래에는 float에 lookahead 붙이지 않았음)
+
+```cpp
+".."/[0-9]     { printf("OP\t%s\n", yytext); }  // 먼저 정의
+[0-9]+"."[0-9]*([eE][+-]?[0-9]+)?     { printf("FLOAT\t%s\n", yytext); } // 뒤에 둠
+-?[0-9]+                   { printf("INT\t%s\n", yytext); }
 ```
-type_specifier : TYPE
-               | struct_specifier ;
+
+#  6. Test
+
+다음의 코드를 테스트함.
+
+```cpp
+/************************
+   /* nested comments*/
+ ************************/
+struct _point {    loat x, y, z; int color;
+} point[20];
+struct _line {    truct _point *p[2]; int color; float meter = 0.5;
+} line[20];
+
+1..50
 ```
-int, char, struct(구조체) 타입을 지정함.
 
-#### func_decl – 함수 선언부
+다음의 결과가 나와야함.
+
+```cpp
+KEY	struct
+ID	_point
+OP	{
+ID	loat
+ID	x
+OP	,
+ID	y
+OP	,
+ID	z
+OP	;
+KEY	int
+ID	color
+OP	;
+OP	}
+ID	point
+OP	[
+INT	20
+OP	]
+OP	;
+KEY	struct
+ID	_line
+OP	{
+ID	truct
+ID	_point
+OP	*
+ID	p
+OP	[
+INT	2
+OP	]
+OP	;
+KEY	int
+ID	color
+OP	;
+KEY	float
+ID	meter
+OP	=
+F	0.5
+OP	;
+OP	}
+ID	line
+OP	[
+INT	20
+OP	]
+OP	;
+INT	1
+OP	..
+INT	50
 ```
-func_decl : type_specifier pointers ID '(' ')'
-          | type_specifier pointers ID '(' param_list ')' ;
-```
-반환 타입, 함수 이름, 매개변수 리스트로 구성됨<br>
-main() 함수도 이 문법에 포함.
-
-#### compound_stmt – 중괄호 블록
-```
-compound_stmt : '{' def_list stmt_list '}' ;
-```
-함수의 몸체, 조건문 등에서 사용되는 중괄호 구조
-
-#### def_list, def – 지역 변수 정의
-```
-def_list : def_list def
-         | %empty ;
-
-def : type_specifier pointers ID ';'
-    | type_specifier pointers ID '[' INTEGER_CONST ']' ';' ;
-```
-지역 변수를 처리해줌.<br>
-def는 한 개의 선언문, def_list는 선언문의 리스트를 의미함.
-
-#### stmt_list, stmt – 실행 문장 목록
-```
-stmt_list : stmt_list stmt
-          | %empty ;
-
-stmt : expr ';'
-     | compound_stmt
-     | RETURN expr ';'
-     | ';'
-     | IF '(' expr ')' stmt
-     | IF '(' expr ')' stmt ELSE stmt
-     | WHILE '(' expr ')' stmt
-     | FOR '(' expr_e ';' expr_e ';' expr_e ')' stmt
-     | BREAK ';'
-     | CONTINUE ';' ;
-```
-- 모든 실행문은 stmt로 정의
-- 표현식, 조건문, 반복문, return문 등 모든 종류 포함
-
-#### expr, binary, unary – 표현식의 핵심
-```
-expr : unary '=' expr
-     | binary ;
-
-binary : binary '+' binary
-       | binary '-' binary
-       | binary '*' binary
-       | binary '/' binary
-       | binary LOGICAL_OR binary
-       | binary RELOP binary
-       | unary %prec '=' ;
-```
-- expr = expr, a + b, x == y 등 복합 표현식들을 처리
-- 우선순위와 결합성은 %left, %right, %prec를 통해 정의됨
-
-#### unary – 단항 연산과 기본값들
-```
-unary : '(' expr ')'
-      | INTEGER_CONST
-      | CHAR_CONST
-      | ID
-      | '-' unary %prec '!'
-      | '!' unary
-      | unary '[' expr ']'
-      | unary '.' ID
-      | unary STRUCTOP ID
-      | unary '(' args ')'
-      | SYM_NULL ;
-```
-문법 구조에서 단항 표현식을 의미하는 non-terminal symbol<br>
-10, -x, a[3], f(x, y) 등의 표현을 모두 수용
 
 
-# Conflict 해결 전략
-기본적으로 구현하는 문법이 Ambiguous한 문법임
-따라서 모호하지 않도록 우선순위를 설정해주는 과정이 필요함
-또한, 다양한 표현식을 다루어야 하기 때문에 복잡한 문법이고, 이 과정에서 Shift/Reduce Conflict가 발생하는데 이를 해결해줘야 함.
 
-### Solution1: 연산자 우선순위 및 결합 방향 지정
-동일한 시작 토큰을 가지는 여러 문법 규칙이 충돌하는 경우,
-어떤 것을 우선적으로 shift할지, reduce할지 정해줘야함.
+# 완성을 위한 Checklist
 
-Yacc의 precedence 지정자를 통해서 해결함
-```
-%left ','                   // 쉼표 연산자
-%right '='                 // 대입은 오른쪽 결합
-%left LOGICAL_OR           
-%left LOGICAL_AND          
-%left EQUOP                
-%left RELOP                
-%left '+' '-'              
-%left '*' '/' '%'          // 산술 연산자 우선순위
-```
-- a = b + c * d; 를 파싱할 때:
-- *의 우선순위가 +보다 높고, +가 =보다 높음
-- 따라서 c * d → b + (c * d) → a = (b + (c * d)) 순으로 파싱됨
-- Conflict가 발생하지 않고, 정확한 AST(구문 트리)를 구성 가능
+### 기본 구조
 
-### Solution2: 단항 연산자 처리
--a처럼 단항 음수 연산자와 이항 빼기 연산자가 동일한 기호(’-’)를 사용하여 충돌 발생<br>
-단항 -, !, &, * 등의 연산자에는 우선순위 지시자(%prec) 사용<br>
-UMINUS, DEREF와 같은 가상 토큰을 도입하여 우선순위를 직접 부여
+- [ ] subc.l 파일에 Lex 기본 구조 (%{ %}, %%, main())를 만든다.
+- [ ] main() 함수에 BEGIN NORMAL;과 yylex(); 호출을 추가한다.
+- [ ] int commentdepth = 0;를 선언하고 %start NORMAL COMMENT로 상태를 정의한다.
+- [ ] Keyword들을 정규표현식으로 정의하고, identifier보다 위에 배치한다.
+- [ ] Identifier 패턴을 [a-zA-Z_][a-zA-Z0-9_]*로 작성하고 ID로 출력한다.
+- [ ] 모든 operator (++, --, {, }, ==, =, +=, .., 등)를 정규표현식으로 정의한다.
+- [ ] 모든 출력은 printf("TYPE\t%s\n", yytext); 형태로 작성한다.
 
-```
-%nonassoc LOWER_THAN_ELSE UMINUS
-%right '!' '&' DEREF
+### ..연산자 
 
-unary
-  : '-' unary %prec UMINUS         // 단항 마이너스
-  | '*' unary %prec DEREF          // 포인터 역참조
-  | INCOP unary %prec UMINUS       // 전위 증가
-  ...
-```
-- %prec UMINUS를 사용함으로써, -a가 a - b와 충돌하지 않도록 함
-- Yacc은 - 기호가 나왔을 때 context에 따라 적절한 문법 규칙을 선택할 수 있게 됨
+- [ ] .. 연산자를 /[0-9] lookahead와 함께 정의하고 float보다 위에 배치한다.
+- [ ] Float은 [0-9]+"."[0-9]*([eE][+-]?[0-9]+)? 형태로 정의하고 .5는 허용하지 않는다.
+- [ ] 정수는 -?[0-9]+ 패턴으로 정의한다.
+- [ ] whitespace ([ \t\n]+)는 무시되도록 정의한다.
 
-### Solution3: 조건문 if-else문 모호성 해결
-if (cond) if (inner) stmt; else stmt; <br>와 같이 중첩된 if-else 문에서
-else가 어떤 if와 매칭되는지를 파악할 수 없어 Conflict 발생
+### 중첩 주석
 
-```
-%nonassoc LOWER_THAN_ELSE
-%nonassoc ELSE
+- [ ] 주석 시작 /*를 만나면 BEGIN COMMENT, commentdepth++를 수행한다.
+- [ ] 주석 안에서 또 다른 /*를 만나면 commentdepth++ 한다.
+- [ ] */를 만나면 commentdepth-- 하고, commentdepth == 0이면 BEGIN NORMAL로 돌아온다.
+- [ ] COMMENT 상태에서 나머지 문자들은 무시한다 (.|\n ;).
 
-stmt
-  : IF '(' expr ')' stmt %prec LOWER_THAN_ELSE
-  | IF '(' expr ')' stmt ELSE stmt
-```
-- IF (...) stmt %prec LOWER_THAN_ELSE는 ELSE보다 우선순위가 낮은 것으로 처리
-- 	따라서 ELSE가 있는 경우 항상 두 번째 규칙(ELSE 버전)이 선택되어, “ELSE와 가장 가까운 IF”와 매칭되도록 
+### 출력 및 제출
 
-### Solution4: 구조체, 배열, 함수 호출 등 연산자 우선순위
-a[3], s.member, ptr->x, func(x, y) 등의 표현식은 모두 unary로 분류되지만,
-내부적으로 연산자 간의 우선순위 및 결합 방식이 다름
-```
-%left '[' '.' '('                // 구조체/배열/함수 접근 연산자 우선순위 낮춤
-%left STRUCTOP INCOP DECOP       // 구조체 포인터 접근, 후위 연산자
-```
-- 배열 접근 a[3] → unary '[' expr ']'
-- 구조체 접근 s.x, ptr->x → unary '.' ID, unary STRUCTOP ID
-- 후위 증가/감소 연산자 → unary INCOP, unary DECOP
-- 후위 연산자(++, –), 구조체 접근 등이 다른 연산자보다 우선적으로 Reduce되도록 우선순위를 배정
-
-# 구현하면서 발생한 문제와 해결 방법
-- 기존의 교재에서 나온 %precedence IF & %precedence ELSE로 해결하려고 하였으나, Bison에서 지원하지 않음 => 이를 해결하기 위해서 %prec을 사용함.
-
-- Yacc 이전에 Lex에서 파싱이 제대로 이루어지지 않아서 Syntax Error를 발생함. => | 연산자로 여러 개 묶어놓은 부분에서 문제가 발생 -> | 로 나누지 않고 각 개별로 구현하였더니 정상 작동함.
-
-
-# 참고사항
-- 기본 Grammer는 파일로 제공됨
-- Grammer의 Production rule은 변경하면 안 됨
-
-
+- [ ] 출력 형식이 반드시 TYPE<tab>lexeme (\t) 형식으로 나오도록 한다.
+- [ ] Makefile을 작성해서 make 명령어로 빌드가 가능하도록 한다.
+- [ ] subc 실행 파일이 생성되고, ./subc input.c와 같은 테스트가 가능하다.
+- [ ] shortex.c 예제처럼 실제 테스트 케이스를 입력하고 결과가 예상과 일치하는지 확인한다.
+- [ ] 다양한 입력(1..5, 3.14, nested comments)으로 테스트하고 예상대로 작동하는지 점검한다.
+- [ ] 최종 제출 전 subc.l, Makefile, 필요한 소스 파일만 zip으로 압축한다.
+- [ ] 압축 파일 이름은 Compiler_Project1_학번.zip 형식으로 지정한다.
+- [ ] .o, lex.yy.c, subc 실행 파일 등 불필요한 빌드 산출물은 zip에 포함하지 않는다.
+- [ ] LMS에 정상 제출되었는지, 제출 마감 시간을 지켰는지 확인한다.
