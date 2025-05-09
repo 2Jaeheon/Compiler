@@ -1,3 +1,9 @@
+Terminals unused in grammar
+
+    '<'
+    '>'
+
+
 Grammar
 
     0 $accept: program $end
@@ -108,36 +114,36 @@ Terminals, with rules where they appear
     '.' (46) 65
     '/' (47) 46
     ';' (59) 4 5 6 22 23 27 29 30 34 35 36
+    '<' (60)
     '=' (61) 39
+    '>' (62)
     '[' (91) 5 19 23 64
     ']' (93) 5 19 23 64
     '{' (123) 6 10 24
     '}' (125) 6 10 24
     error (256)
-    DEREF (258)
-    LOWER_THAN_ELSE (259)
-    UMINUS (260)
-    TYPE (261) 8
-    STRUCT (262) 6 10 11
-    SYM_NULL (263) 69
-    RETURN (264) 29
-    INTEGER_CONST (265) 5 19 23 52
-    CHAR_CONST (266) 53
-    STRING (267) 54
-    IF (268) 31 32
-    ELSE (269) 32
-    WHILE (270) 33
-    FOR (271) 34
-    BREAK (272) 35
-    CONTINUE (273) 36
-    LOGICAL_OR (274) 50
-    LOGICAL_AND (275) 49
-    RELOP (276) 41
-    EQUOP (277) 42
-    INCOP (278) 58 60
-    DECOP (279) 59 61
-    STRUCTOP (280) 66
-    ID (281) 4 5 6 10 11 12 13 18 19 22 23 55 65 66
+    LOWER_THAN_ELSE (258)
+    TYPE (259) 8
+    STRUCT (260) 6 10 11
+    SYM_NULL (261) 69
+    RETURN (262) 29
+    INTEGER_CONST (263) 5 19 23 52
+    CHAR_CONST (264) 53
+    STRING (265) 54
+    IF (266) 31 32
+    ELSE (267) 32
+    WHILE (268) 33
+    FOR (269) 34
+    BREAK (270) 35
+    CONTINUE (271) 36
+    LOGICAL_OR (272) 50
+    LOGICAL_AND (273) 49
+    RELOP (274) 41
+    EQUOP (275) 42
+    INCOP (276) 58 60
+    DECOP (277) 59 61
+    STRUCTOP (278) 66
+    ID (279) 4 5 6 10 11 12 13 18 19 22 23 55 65 66
 
 
 Nonterminals, with rules where they appear

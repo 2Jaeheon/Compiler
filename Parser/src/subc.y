@@ -28,10 +28,10 @@ void  reduce(char* s);
      
 %left '[' '.' '('
 %left STRUCTOP INCOP DECOP
-%right '!' '&' DEREF
-
-%nonassoc LOWER_THAN_ELSE UMINUS
+%right '!' '&'
+%nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
+%nonassoc '<' '>'
 
 /* Tokens */
 %token TYPE STRUCT SYM_NULL RETURN
@@ -40,6 +40,7 @@ void  reduce(char* s);
 %token LOGICAL_OR LOGICAL_AND
 %token RELOP EQUOP INCOP DECOP STRUCTOP
 %token ID
+
 
 
 %%
@@ -51,7 +52,6 @@ program
 ext_def_list
 : ext_def_list ext_def  { printf("ext_def_list->ext_def_list ext_def\n"); }
 | %empty  { printf("ext_def_list->epsilon\n"); }
-
 ;
 
 ext_def
@@ -115,7 +115,7 @@ stmt
 | compound_stmt  { printf("stmt->compound_stmt\n"); }
 | RETURN expr ';'  { printf("stmt->RETURN expr ';'\n"); }
 | ';'  { printf("stmt->';'\n"); }
-| IF '(' expr ')' stmt %prec LOWER_THAN_ELSE  { printf("stmt->IF '(' expr ')' stmt\n"); }
+| IF '(' expr ')' stmt %prec LOWER_THAN_ELSE { printf("stmt->IF '(' expr ')' stmt\n"); }
 | IF '(' expr ')' stmt ELSE stmt  { printf("stmt->IF '(' expr ')' stmt ELSE stmt\n"); }
 | WHILE '(' expr ')' stmt  { printf("stmt->WHILE '(' expr ')' stmt\n"); }
 | FOR '(' expr_e ';' expr_e ';' expr_e ')' stmt  { printf("stmt->FOR '(' expr_e ';' expr_e ';' expr_e ')' stmt\n"); }
@@ -152,14 +152,14 @@ unary
 | CHAR_CONST  { printf("unary->CHAR_CONST\n"); }
 | STRING  { printf("unary->STRING\n"); }
 | ID  { printf("unary->ID\n"); }
-| '-' unary %prec UMINUS  { printf("unary->'-' unary\n"); }
+| '-' unary %prec '!' { printf("unary->'-' unary\n"); }
 | '!' unary  { printf("unary->'!' unary\n"); }
 | unary INCOP %prec STRUCTOP  { printf("unary->unary INCOP\n"); }
 | unary DECOP %prec STRUCTOP  { printf("unary->unary DECOP\n"); }
-| INCOP unary %prec UMINUS  { printf("unary->INCOP unary\n"); }
-| DECOP unary %prec UMINUS  { printf("unary->DECOP unary\n"); }
+| INCOP unary %prec '!'  { printf("unary->INCOP unary\n"); }
+| DECOP unary %prec '!'  { printf("unary->DECOP unary\n"); }
 | '&' unary  { printf("unary->'&' unary\n"); }
-| '*' unary %prec DEREF  { printf("unary->'*' unary\n"); }
+| '*' unary %prec '!'  { printf("unary->'*' unary\n"); }
 | unary '[' expr ']'  { printf("unary->unary '[' expr ']'\n"); }
 | unary '.' ID  { printf("unary->unary '.' ID\n"); }
 | unary STRUCTOP ID  { printf("unary->unary STRUCTOP ID\n"); }

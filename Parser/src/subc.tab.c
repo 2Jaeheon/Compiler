@@ -120,9 +120,9 @@ enum yysymbol_kind_t
   YYSYMBOL_12_ = 12,                       /* '('  */
   YYSYMBOL_13_ = 13,                       /* '!'  */
   YYSYMBOL_14_ = 14,                       /* '&'  */
-  YYSYMBOL_DEREF = 15,                     /* DEREF  */
-  YYSYMBOL_LOWER_THAN_ELSE = 16,           /* LOWER_THAN_ELSE  */
-  YYSYMBOL_UMINUS = 17,                    /* UMINUS  */
+  YYSYMBOL_LOWER_THAN_ELSE = 15,           /* LOWER_THAN_ELSE  */
+  YYSYMBOL_16_ = 16,                       /* '<'  */
+  YYSYMBOL_17_ = 17,                       /* '>'  */
   YYSYMBOL_TYPE = 18,                      /* TYPE  */
   YYSYMBOL_STRUCT = 19,                    /* STRUCT  */
   YYSYMBOL_SYM_NULL = 20,                  /* SYM_NULL  */
@@ -508,7 +508,7 @@ union yyalloc
 #define YYNSTATES  148
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   281
+#define YYMAXUTOK   279
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -528,7 +528,7 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,    13,     2,     2,     2,     9,    14,     2,
       12,    43,     7,     5,     3,     6,    11,     8,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,    39,
-       2,     4,     2,     2,     2,     2,     2,     2,     2,     2,
+      16,     4,    17,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,    10,     2,    40,     2,     2,     2,     2,     2,     2,
@@ -547,17 +547,16 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,    15,    16,
-      17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
-      27,    28,    29,    30,    31,    32,    33,    34,    35,    36,
-      37,    38
+       2,     2,     2,     2,     2,     2,     1,     2,    15,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    48,    48,    52,    53,    58,    59,    60,    61,    65,
+       0,    49,    49,    53,    54,    58,    59,    60,    61,    65,
       66,    70,    71,    75,    76,    80,    81,    85,    86,    90,
       91,    95,    96,   100,   101,   105,   109,   110,   114,   115,
      116,   117,   118,   119,   120,   121,   122,   123,   127,   128,
@@ -581,8 +580,8 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
 static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "','", "'='", "'+'",
-  "'-'", "'*'", "'/'", "'%'", "'['", "'.'", "'('", "'!'", "'&'", "DEREF",
-  "LOWER_THAN_ELSE", "UMINUS", "TYPE", "STRUCT", "SYM_NULL", "RETURN",
+  "'-'", "'*'", "'/'", "'%'", "'['", "'.'", "'('", "'!'", "'&'",
+  "LOWER_THAN_ELSE", "'<'", "'>'", "TYPE", "STRUCT", "SYM_NULL", "RETURN",
   "INTEGER_CONST", "CHAR_CONST", "STRING", "IF", "ELSE", "WHILE", "FOR",
   "BREAK", "CONTINUE", "LOGICAL_OR", "LOGICAL_AND", "RELOP", "EQUOP",
   "INCOP", "DECOP", "STRUCTOP", "ID", "';'", "']'", "'{'", "'}'", "')'",
@@ -1233,433 +1232,433 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: ext_def_list  */
-#line 48 "subc.y"
+#line 49 "subc.y"
                 { printf("program->ext_def_list\n"); }
-#line 1239 "subc.tab.c"
+#line 1238 "subc.tab.c"
     break;
 
   case 3: /* ext_def_list: ext_def_list ext_def  */
-#line 52 "subc.y"
+#line 53 "subc.y"
                         { printf("ext_def_list->ext_def_list ext_def\n"); }
-#line 1245 "subc.tab.c"
+#line 1244 "subc.tab.c"
     break;
 
   case 4: /* ext_def_list: %empty  */
-#line 53 "subc.y"
+#line 54 "subc.y"
           { printf("ext_def_list->epsilon\n"); }
-#line 1251 "subc.tab.c"
+#line 1250 "subc.tab.c"
     break;
 
   case 5: /* ext_def: type_specifier pointers ID ';'  */
 #line 58 "subc.y"
                                   { printf("ext_def->type_specifier pointers ID ';'\n"); }
-#line 1257 "subc.tab.c"
+#line 1256 "subc.tab.c"
     break;
 
   case 6: /* ext_def: type_specifier pointers ID '[' INTEGER_CONST ']' ';'  */
 #line 59 "subc.y"
                                                         { printf("ext_def->type_specifier pointers ID '[' INTEGER_CONST ']' ';'\n"); }
-#line 1263 "subc.tab.c"
+#line 1262 "subc.tab.c"
     break;
 
   case 7: /* ext_def: STRUCT ID '{' def_list '}' ';'  */
 #line 60 "subc.y"
                                   { printf("ext_def->STRUCT ID '{' def_list '}' ';'\n"); }
-#line 1269 "subc.tab.c"
+#line 1268 "subc.tab.c"
     break;
 
   case 8: /* ext_def: func_decl compound_stmt  */
 #line 61 "subc.y"
                            { printf("ext_def->func_decl compound_stmt\n"); }
-#line 1275 "subc.tab.c"
+#line 1274 "subc.tab.c"
     break;
 
   case 9: /* type_specifier: TYPE  */
 #line 65 "subc.y"
         { printf("type_specifier->TYPE\n"); }
-#line 1281 "subc.tab.c"
+#line 1280 "subc.tab.c"
     break;
 
   case 10: /* type_specifier: struct_specifier  */
 #line 66 "subc.y"
                     { printf("type_specifier->struct_specifier\n"); }
-#line 1287 "subc.tab.c"
+#line 1286 "subc.tab.c"
     break;
 
   case 11: /* struct_specifier: STRUCT ID '{' def_list '}'  */
 #line 70 "subc.y"
                               { printf("struct_specifier->STRUCT ID '{' def_list '}'\n"); }
-#line 1293 "subc.tab.c"
+#line 1292 "subc.tab.c"
     break;
 
   case 12: /* struct_specifier: STRUCT ID  */
 #line 71 "subc.y"
              { printf("struct_specifier->STRUCT ID\n"); }
-#line 1299 "subc.tab.c"
+#line 1298 "subc.tab.c"
     break;
 
   case 13: /* func_decl: type_specifier pointers ID '(' ')'  */
 #line 75 "subc.y"
                                       { printf("func_decl->type_specifier pointers ID '(' ')'\n"); }
-#line 1305 "subc.tab.c"
+#line 1304 "subc.tab.c"
     break;
 
   case 14: /* func_decl: type_specifier pointers ID '(' param_list ')'  */
 #line 76 "subc.y"
                                                  { printf("func_decl->type_specifier pointers ID '(' param_list ')'\n"); }
-#line 1311 "subc.tab.c"
+#line 1310 "subc.tab.c"
     break;
 
   case 15: /* pointers: '*'  */
 #line 80 "subc.y"
        { printf("pointers->'*'\n"); }
-#line 1317 "subc.tab.c"
+#line 1316 "subc.tab.c"
     break;
 
   case 16: /* pointers: %empty  */
 #line 81 "subc.y"
           { printf("pointers->epsilon\n"); }
-#line 1323 "subc.tab.c"
+#line 1322 "subc.tab.c"
     break;
 
   case 17: /* param_list: param_decl  */
 #line 85 "subc.y"
               { printf("param_list->param_decl\n"); }
-#line 1329 "subc.tab.c"
+#line 1328 "subc.tab.c"
     break;
 
   case 18: /* param_list: param_list ',' param_decl  */
 #line 86 "subc.y"
                              { printf("param_list->param_list ',' param_decl\n"); }
-#line 1335 "subc.tab.c"
+#line 1334 "subc.tab.c"
     break;
 
   case 19: /* param_decl: type_specifier pointers ID  */
 #line 90 "subc.y"
                               { printf("param_decl->type_specifier pointers ID\n"); }
-#line 1341 "subc.tab.c"
+#line 1340 "subc.tab.c"
     break;
 
   case 20: /* param_decl: type_specifier pointers ID '[' INTEGER_CONST ']'  */
 #line 91 "subc.y"
                                                     { printf("param_decl->type_specifier pointers ID '[' INTEGER_CONST ']'\n"); }
-#line 1347 "subc.tab.c"
+#line 1346 "subc.tab.c"
     break;
 
   case 21: /* def_list: def_list def  */
 #line 95 "subc.y"
                 { printf("def_list->def_list def\n"); }
-#line 1353 "subc.tab.c"
+#line 1352 "subc.tab.c"
     break;
 
   case 22: /* def_list: %empty  */
 #line 96 "subc.y"
           { printf("def_list->epsilon\n"); }
-#line 1359 "subc.tab.c"
+#line 1358 "subc.tab.c"
     break;
 
   case 23: /* def: type_specifier pointers ID ';'  */
 #line 100 "subc.y"
                                   { printf("def->type_specifier pointers ID ';'\n"); }
-#line 1365 "subc.tab.c"
+#line 1364 "subc.tab.c"
     break;
 
   case 24: /* def: type_specifier pointers ID '[' INTEGER_CONST ']' ';'  */
 #line 101 "subc.y"
                                                         { printf("def->type_specifier pointers ID '[' INTEGER_CONST ']' ';'\n"); }
-#line 1371 "subc.tab.c"
+#line 1370 "subc.tab.c"
     break;
 
   case 25: /* compound_stmt: '{' def_list stmt_list '}'  */
 #line 105 "subc.y"
                               { printf("compound_stmt->'{' def_list stmt_list '}'\n"); }
-#line 1377 "subc.tab.c"
+#line 1376 "subc.tab.c"
     break;
 
   case 26: /* stmt_list: stmt_list stmt  */
 #line 109 "subc.y"
                   { printf("stmt_list->stmt_list stmt\n"); }
-#line 1383 "subc.tab.c"
+#line 1382 "subc.tab.c"
     break;
 
   case 27: /* stmt_list: %empty  */
 #line 110 "subc.y"
           { printf("stmt_list->epsilon\n"); }
-#line 1389 "subc.tab.c"
+#line 1388 "subc.tab.c"
     break;
 
   case 28: /* stmt: expr ';'  */
 #line 114 "subc.y"
             { printf("stmt->expr ';'\n"); }
-#line 1395 "subc.tab.c"
+#line 1394 "subc.tab.c"
     break;
 
   case 29: /* stmt: compound_stmt  */
 #line 115 "subc.y"
                  { printf("stmt->compound_stmt\n"); }
-#line 1401 "subc.tab.c"
+#line 1400 "subc.tab.c"
     break;
 
   case 30: /* stmt: RETURN expr ';'  */
 #line 116 "subc.y"
                    { printf("stmt->RETURN expr ';'\n"); }
-#line 1407 "subc.tab.c"
+#line 1406 "subc.tab.c"
     break;
 
   case 31: /* stmt: ';'  */
 #line 117 "subc.y"
        { printf("stmt->';'\n"); }
-#line 1413 "subc.tab.c"
+#line 1412 "subc.tab.c"
     break;
 
   case 32: /* stmt: IF '(' expr ')' stmt  */
 #line 118 "subc.y"
-                                              { printf("stmt->IF '(' expr ')' stmt\n"); }
-#line 1419 "subc.tab.c"
+                                             { printf("stmt->IF '(' expr ')' stmt\n"); }
+#line 1418 "subc.tab.c"
     break;
 
   case 33: /* stmt: IF '(' expr ')' stmt ELSE stmt  */
 #line 119 "subc.y"
                                   { printf("stmt->IF '(' expr ')' stmt ELSE stmt\n"); }
-#line 1425 "subc.tab.c"
+#line 1424 "subc.tab.c"
     break;
 
   case 34: /* stmt: WHILE '(' expr ')' stmt  */
 #line 120 "subc.y"
                            { printf("stmt->WHILE '(' expr ')' stmt\n"); }
-#line 1431 "subc.tab.c"
+#line 1430 "subc.tab.c"
     break;
 
   case 35: /* stmt: FOR '(' expr_e ';' expr_e ';' expr_e ')' stmt  */
 #line 121 "subc.y"
                                                  { printf("stmt->FOR '(' expr_e ';' expr_e ';' expr_e ')' stmt\n"); }
-#line 1437 "subc.tab.c"
+#line 1436 "subc.tab.c"
     break;
 
   case 36: /* stmt: BREAK ';'  */
 #line 122 "subc.y"
              { printf("stmt->BREAK ';'\n"); }
-#line 1443 "subc.tab.c"
+#line 1442 "subc.tab.c"
     break;
 
   case 37: /* stmt: CONTINUE ';'  */
 #line 123 "subc.y"
                 { printf("stmt->CONTINUE ';'\n"); }
-#line 1449 "subc.tab.c"
+#line 1448 "subc.tab.c"
     break;
 
   case 38: /* expr_e: expr  */
 #line 127 "subc.y"
         { printf("expr_e->expr\n"); }
-#line 1455 "subc.tab.c"
+#line 1454 "subc.tab.c"
     break;
 
   case 39: /* expr_e: %empty  */
 #line 128 "subc.y"
           { printf("expr_e->epsilon\n"); }
-#line 1461 "subc.tab.c"
+#line 1460 "subc.tab.c"
     break;
 
   case 40: /* expr: unary '=' expr  */
 #line 132 "subc.y"
                   { printf("expr->unary '=' expr\n"); }
-#line 1467 "subc.tab.c"
+#line 1466 "subc.tab.c"
     break;
 
   case 41: /* expr: binary  */
 #line 133 "subc.y"
           { printf("expr->binary\n"); }
-#line 1473 "subc.tab.c"
+#line 1472 "subc.tab.c"
     break;
 
   case 42: /* binary: binary RELOP binary  */
 #line 137 "subc.y"
                        { printf("binary->binary RELOP binary\n"); }
-#line 1479 "subc.tab.c"
+#line 1478 "subc.tab.c"
     break;
 
   case 43: /* binary: binary EQUOP binary  */
 #line 138 "subc.y"
                        { printf("binary->binary EQUOP binary\n"); }
-#line 1485 "subc.tab.c"
+#line 1484 "subc.tab.c"
     break;
 
   case 44: /* binary: binary '+' binary  */
 #line 139 "subc.y"
                      { printf("binary->binary '+' binary\n"); }
-#line 1491 "subc.tab.c"
+#line 1490 "subc.tab.c"
     break;
 
   case 45: /* binary: binary '-' binary  */
 #line 140 "subc.y"
                      { printf("binary->binary '-' binary\n"); }
-#line 1497 "subc.tab.c"
+#line 1496 "subc.tab.c"
     break;
 
   case 46: /* binary: binary '*' binary  */
 #line 141 "subc.y"
                      { printf("binary->binary '*' binary\n"); }
-#line 1503 "subc.tab.c"
+#line 1502 "subc.tab.c"
     break;
 
   case 47: /* binary: binary '/' binary  */
 #line 142 "subc.y"
                      { printf("binary->binary '/' binary\n"); }
-#line 1509 "subc.tab.c"
+#line 1508 "subc.tab.c"
     break;
 
   case 48: /* binary: binary '%' binary  */
 #line 143 "subc.y"
                      { printf("binary->binary '%%' binary\n"); }
-#line 1515 "subc.tab.c"
+#line 1514 "subc.tab.c"
     break;
 
   case 49: /* binary: unary  */
 #line 144 "subc.y"
                    { printf("binary->unary\n"); }
-#line 1521 "subc.tab.c"
+#line 1520 "subc.tab.c"
     break;
 
   case 50: /* binary: binary LOGICAL_AND binary  */
 #line 145 "subc.y"
                              { printf("binary->binary LOGICAL_AND binary\n"); }
-#line 1527 "subc.tab.c"
+#line 1526 "subc.tab.c"
     break;
 
   case 51: /* binary: binary LOGICAL_OR binary  */
 #line 146 "subc.y"
                             { printf("binary->binary LOGICAL_OR binary\n"); }
-#line 1533 "subc.tab.c"
+#line 1532 "subc.tab.c"
     break;
 
   case 52: /* unary: '(' expr ')'  */
 #line 150 "subc.y"
                 { printf("unary->'(' expr ')'\n"); }
-#line 1539 "subc.tab.c"
+#line 1538 "subc.tab.c"
     break;
 
   case 53: /* unary: INTEGER_CONST  */
 #line 151 "subc.y"
                  { printf("unary->INTEGER_CONST\n"); }
-#line 1545 "subc.tab.c"
+#line 1544 "subc.tab.c"
     break;
 
   case 54: /* unary: CHAR_CONST  */
 #line 152 "subc.y"
               { printf("unary->CHAR_CONST\n"); }
-#line 1551 "subc.tab.c"
+#line 1550 "subc.tab.c"
     break;
 
   case 55: /* unary: STRING  */
 #line 153 "subc.y"
           { printf("unary->STRING\n"); }
-#line 1557 "subc.tab.c"
+#line 1556 "subc.tab.c"
     break;
 
   case 56: /* unary: ID  */
 #line 154 "subc.y"
       { printf("unary->ID\n"); }
-#line 1563 "subc.tab.c"
+#line 1562 "subc.tab.c"
     break;
 
   case 57: /* unary: '-' unary  */
 #line 155 "subc.y"
-                          { printf("unary->'-' unary\n"); }
-#line 1569 "subc.tab.c"
+                      { printf("unary->'-' unary\n"); }
+#line 1568 "subc.tab.c"
     break;
 
   case 58: /* unary: '!' unary  */
 #line 156 "subc.y"
              { printf("unary->'!' unary\n"); }
-#line 1575 "subc.tab.c"
+#line 1574 "subc.tab.c"
     break;
 
   case 59: /* unary: unary INCOP  */
 #line 157 "subc.y"
                               { printf("unary->unary INCOP\n"); }
-#line 1581 "subc.tab.c"
+#line 1580 "subc.tab.c"
     break;
 
   case 60: /* unary: unary DECOP  */
 #line 158 "subc.y"
                               { printf("unary->unary DECOP\n"); }
-#line 1587 "subc.tab.c"
+#line 1586 "subc.tab.c"
     break;
 
   case 61: /* unary: INCOP unary  */
 #line 159 "subc.y"
-                            { printf("unary->INCOP unary\n"); }
-#line 1593 "subc.tab.c"
+                         { printf("unary->INCOP unary\n"); }
+#line 1592 "subc.tab.c"
     break;
 
   case 62: /* unary: DECOP unary  */
 #line 160 "subc.y"
-                            { printf("unary->DECOP unary\n"); }
-#line 1599 "subc.tab.c"
+                         { printf("unary->DECOP unary\n"); }
+#line 1598 "subc.tab.c"
     break;
 
   case 63: /* unary: '&' unary  */
 #line 161 "subc.y"
              { printf("unary->'&' unary\n"); }
-#line 1605 "subc.tab.c"
+#line 1604 "subc.tab.c"
     break;
 
   case 64: /* unary: '*' unary  */
 #line 162 "subc.y"
-                         { printf("unary->'*' unary\n"); }
-#line 1611 "subc.tab.c"
+                       { printf("unary->'*' unary\n"); }
+#line 1610 "subc.tab.c"
     break;
 
   case 65: /* unary: unary '[' expr ']'  */
 #line 163 "subc.y"
                       { printf("unary->unary '[' expr ']'\n"); }
-#line 1617 "subc.tab.c"
+#line 1616 "subc.tab.c"
     break;
 
   case 66: /* unary: unary '.' ID  */
 #line 164 "subc.y"
                 { printf("unary->unary '.' ID\n"); }
-#line 1623 "subc.tab.c"
+#line 1622 "subc.tab.c"
     break;
 
   case 67: /* unary: unary STRUCTOP ID  */
 #line 165 "subc.y"
                      { printf("unary->unary STRUCTOP ID\n"); }
-#line 1629 "subc.tab.c"
+#line 1628 "subc.tab.c"
     break;
 
   case 68: /* unary: unary '(' args ')'  */
 #line 166 "subc.y"
                       { printf("unary->unary '(' args ')'\n"); }
-#line 1635 "subc.tab.c"
+#line 1634 "subc.tab.c"
     break;
 
   case 69: /* unary: unary '(' ')'  */
 #line 167 "subc.y"
                  { printf("unary->unary '(' ')'\n"); }
-#line 1641 "subc.tab.c"
+#line 1640 "subc.tab.c"
     break;
 
   case 70: /* unary: SYM_NULL  */
 #line 168 "subc.y"
             { printf("unary->SYM_NULL\n"); }
-#line 1647 "subc.tab.c"
+#line 1646 "subc.tab.c"
     break;
 
   case 71: /* args: expr  */
 #line 172 "subc.y"
         { printf("args->expr\n"); }
-#line 1653 "subc.tab.c"
+#line 1652 "subc.tab.c"
     break;
 
   case 72: /* args: args ',' expr  */
 #line 173 "subc.y"
                  { printf("args->args ',' expr\n"); }
-#line 1659 "subc.tab.c"
+#line 1658 "subc.tab.c"
     break;
 
 
-#line 1663 "subc.tab.c"
+#line 1662 "subc.tab.c"
 
       default: break;
     }
