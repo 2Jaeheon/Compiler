@@ -98,3 +98,24 @@ int lookup_symbol_in_current_scope(const char *name) {
     }
     return 0; // 중복이 없음
 }
+
+// 모든 스코프에서 심볼을 탐색하는 함수
+Symbol* lookup_symbol(const char *name){
+    SymbolTable *scope = current_scope;
+
+    while(scope != NULL) {
+        Symbol *symbol = scope -> symbols;
+
+        while(symbol != NULL) {
+            // 심볼 이름이 일치하는지 확인
+            if (strcmp(symbol->name, name) == 0) {
+                printf("심볼이 존재합니다.");
+                return symbol;
+            }
+            symbol = symbol->next;
+        }
+        scope = scope->parent;
+    }
+    printf("심볼이 존재하지 않습니다.");
+    return NULL;
+}
