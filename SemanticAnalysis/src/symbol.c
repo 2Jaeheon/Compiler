@@ -64,7 +64,7 @@ void pop_scope() {
 
 int insert_symbol(const char *name, TypeInfo *type) {
     // 중복 선언 검사
-    if(/*현재 스코프에 동일한 이름의 심볼이 존재하는지 검사*/) {
+    if(lookup_symbol_in_current_scope(name)) {
         printf("중복 선언 오류: %s\n", name);
         return 0;
     }
@@ -86,3 +86,15 @@ int insert_symbol(const char *name, TypeInfo *type) {
     return 1;
 }
 
+int lookup_symbol_in_current_scope(const char *name) {
+    Symbol *symbol = current_scope -> symbols;
+    // 심볼 리스트를 순회하면서 중복 선언 오류 검사
+    while(symbol != NULL) {
+        if (strcmp(symbol->name, name) == 0) {
+            return 1; // 중복 선언 오류
+        }
+
+        symbol = symbol->next;
+    }
+    return 0; // 중복이 없음
+}

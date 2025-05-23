@@ -36,6 +36,17 @@ int main() {
     pop_scope();  // 전역 스코프 복귀
 
 
-    
+    // 타입 정의 예시 (int 타입)
+    push_scope();         // 블록 진입
+    TypeInfo* int_type = (TypeInfo*)malloc(sizeof(TypeInfo));
+    int_type->type = TYPE_INT;
+    int_type->next = NULL;
+    int_type->struct_name = NULL;
+
+    insert_symbol("a", int_type);  // 성공
+    insert_symbol("a", int_type);  // 중복 실패
+
+    pop_scope(); // 스코프 탈출
+
     return 0;
 }
