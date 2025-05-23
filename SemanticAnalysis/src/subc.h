@@ -7,8 +7,9 @@
 #define __SUBC_H__
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-// declare functions used in other source code file here
+#include "symbol.h"
 
 #endif
