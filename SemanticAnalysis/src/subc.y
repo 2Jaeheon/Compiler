@@ -13,7 +13,7 @@ int   yylex ();
 void   yyerror (char* s);
 int   get_lineno();
 void error_redeclaration(void);
-
+void error_undeclared(void);
 %}
 
 /* Bison declarations section */
@@ -53,6 +53,7 @@ void error_redeclaration(void);
 %token<stringVal> ID  /* identifier name */
 /* non-terminal types: Bison 내부의 비터미널(non-terminal)이 계산된 결과($$)의 타입을 지정 */
 %type<typeInfo> type_specifier  /* type_specifier는 타입 정보를 담는 구조체 포인터(TypeInfo*)를 전달 */
+%type<typeInfo> unary
 
 /* Grammar rules */
 %%
@@ -198,7 +199,16 @@ unary
   | INTEGER_CONST 
   | CHAR_CONST 
   | STRING 
-  | ID 
+  | ID {
+    /* ID를 사용할 때, 이전에 선언된 적이 있는 지 확인해야함. */
+    Symbol *symbol = lookup_symbol($1);
+    if (!symbol) {
+      error_undeclared();
+      $$ = NULL;
+    } else { /* 만일 선언된 적이 없다면, 심볼 테이블에서 해당 식별자의 타입을 찾아 반환 */
+      $$ = symbol -> type;
+    }
+  }
   | '-' unary %prec '!' 
   | '!' unary 
   | unary INCOP %prec STRUCTOP 

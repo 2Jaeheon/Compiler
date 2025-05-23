@@ -78,7 +78,7 @@ int   yylex ();
 void   yyerror (char* s);
 int   get_lineno();
 void error_redeclaration(void);
-
+void error_undeclared(void);
 
 #line 84 "subc.tab.c"
 
@@ -556,14 +556,14 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    58,    58,    62,    63,    67,    73,    79,    80,    84,
-      99,   103,   104,   108,   109,   113,   114,   118,   119,   123,
-     124,   128,   129,   133,   140,   149,   153,   154,   158,   159,
-     160,   161,   162,   163,   164,   165,   166,   167,   171,   172,
-     176,   177,   181,   182,   183,   184,   185,   186,   187,   188,
-     189,   190,   194,   195,   196,   197,   198,   199,   200,   201,
-     202,   203,   204,   205,   206,   207,   208,   209,   210,   211,
-     212,   213,   217,   218
+       0,    61,    61,    65,    66,    70,    76,    82,    83,    87,
+     102,   106,   107,   111,   112,   116,   117,   121,   122,   126,
+     127,   131,   132,   136,   143,   152,   156,   157,   161,   162,
+     163,   164,   165,   166,   167,   168,   169,   170,   174,   175,
+     179,   180,   184,   185,   186,   187,   188,   189,   190,   191,
+     192,   193,   197,   198,   199,   200,   201,   202,   212,   213,
+     214,   215,   216,   217,   218,   219,   220,   221,   222,   223,
+     224,   225,   229,   230
 };
 #endif
 
@@ -1232,7 +1232,7 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* ext_def: type_specifier pointers ID ';'  */
-#line 67 "subc.y"
+#line 70 "subc.y"
                                    {
     /* 타입 정보 생성 */
     if (!insert_symbol((yyvsp[-1].stringVal), (yyvsp[-3].typeInfo))) {
@@ -1243,7 +1243,7 @@ yyreduce:
     break;
 
   case 6: /* ext_def: type_specifier pointers ID '[' INTEGER_CONST ']' ';'  */
-#line 73 "subc.y"
+#line 76 "subc.y"
                                                          {
     /* 타입 정보 생성 */
     if (!insert_symbol((yyvsp[-4].stringVal), (yyvsp[-6].typeInfo))) {
@@ -1254,7 +1254,7 @@ yyreduce:
     break;
 
   case 9: /* type_specifier: TYPE  */
-#line 84 "subc.y"
+#line 87 "subc.y"
          {
     /* 타입 정보 생성 */
     /* 만약 int 또는 char가 들어오면 해당 타입을 나타내는 TypeInfo를 생성해 반환 */
@@ -1274,7 +1274,7 @@ yyreduce:
     break;
 
   case 23: /* def: type_specifier pointers ID ';'  */
-#line 133 "subc.y"
+#line 136 "subc.y"
                                    {
     /* 타입 정보 생성 */
     /* insert_symbol(이름, 타입)을 호출해 심볼 테이블에 추가 */
@@ -1286,7 +1286,7 @@ yyreduce:
     break;
 
   case 24: /* def: type_specifier pointers ID '[' INTEGER_CONST ']' ';'  */
-#line 140 "subc.y"
+#line 143 "subc.y"
                                                          {
     /* 타입 정보 생성 */
     if (!insert_symbol((yyvsp[-4].stringVal), (yyvsp[-6].typeInfo))) {
@@ -1296,8 +1296,23 @@ yyreduce:
 #line 1297 "subc.tab.c"
     break;
 
+  case 57: /* unary: ID  */
+#line 202 "subc.y"
+       {
+    /* ID를 사용할 때, 이전에 선언된 적이 있는 지 확인해야함. */
+    Symbol *symbol = lookup_symbol((yyvsp[0].stringVal));
+    if (!symbol) {
+      error_undeclared();
+      (yyval.typeInfo) = NULL;
+    } else {
+      (yyval.typeInfo) = symbol->type;
+    }
+  }
+#line 1312 "subc.tab.c"
+    break;
 
-#line 1301 "subc.tab.c"
+
+#line 1316 "subc.tab.c"
 
       default: break;
     }
@@ -1490,7 +1505,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 221 "subc.y"
+#line 233 "subc.y"
 
 
 /* Epilogue section */
