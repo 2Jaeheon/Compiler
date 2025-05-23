@@ -14,6 +14,7 @@ void   yyerror (char* s);
 int   get_lineno();
 void error_redeclaration(void);
 void error_undeclared(void);
+void error_incompatible(void);
 %}
 
 /* Bison declarations section */
@@ -53,6 +54,7 @@ void error_undeclared(void);
 %token<stringVal> ID  /* identifier name */
 /* non-terminal types: Bison 내부의 비터미널(non-terminal)이 계산된 결과($$)의 타입을 지정 */
 %type<typeInfo> type_specifier  /* type_specifier는 타입 정보를 담는 구조체 포인터(TypeInfo*)를 전달 */
+%type<typeInfo> struct_specifier
 %type<typeInfo> unary
 %type<typeInfo> expr
 %type<typeInfo> binary
@@ -70,7 +72,7 @@ ext_def_list
   ;
 
 ext_def
-  : type_specifier pointers ID ';' {
+  : type_specifier pointers ID ';' { 
     /* 타입 정보 생성 */
     if (!insert_symbol($3, $1)) {
       error_redeclaration();
@@ -106,8 +108,20 @@ type_specifier
   ;
 
 struct_specifier
-  : STRUCT ID '{' def_list '}' 
-  | STRUCT ID 
+  : STRUCT ID '{' def_list '}' {
+    $$ = malloc(sizeof(TypeInfo));
+    $$->type = TYPE_STRUCT;
+    $$->struct_name = $2;
+    $$->next = NULL;
+    $$->array_size = 0;
+  }
+  | STRUCT ID {
+    $$ = malloc(sizeof(TypeInfo));
+    $$->type = TYPE_STRUCT;
+    $$->struct_name = $2;
+    $$->next = NULL;
+    $$->array_size = 0;
+  }
   ;
 
 func_decl
@@ -152,7 +166,11 @@ def
   ;
 
 compound_stmt
-  : '{' def_list stmt_list '}' 
+  : '{' {
+    push_scope();
+  } def_list stmt_list '}' {
+    pop_scope();
+  }
   ;
 
 stmt_list
@@ -184,9 +202,11 @@ expr
   따라서 이를 통해서 둘 중 하나라도 문제가 있는 경우에는 NULL을 반환하게 한다. */
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
+    } else if(!is_same_type($1, $3)) {
+      error_incompatible();
+      $$ = NULL;
     } else {
-      /* 타입을 검사 */
-      $$ = $1; /* 왼쪽 피연산자의 타입을 반환한다고 우선적으로 가정 */
+      $$ = $1;
     }
   }
   | binary {

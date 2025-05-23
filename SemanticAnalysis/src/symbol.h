@@ -45,5 +45,6 @@ void pop_scope();
 int insert_symbol(const char* name, TypeInfo* type);
 int lookup_symbol_in_current_scope(const char* name);
 Symbol* lookup_symbol(const char *name);
+int is_same_type(TypeInfo* type1, TypeInfo* type2);
 
 #endif
