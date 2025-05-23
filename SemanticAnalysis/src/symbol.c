@@ -42,3 +42,21 @@ void free_symbol_table(SymbolTable* table) {
     free(table);
 }
 
+void push_scope() {
+    SymbolTable *new_scope = create_symbol_table(current_scope); //현재 스코프를 부모로 연결해줌.
+    current_scope = new_scope;
+    printf("push_scope 함수를 통해서 새로운 스코프를 생성하고 진입했습니다.\n");
+}
+
+void pop_scope() {
+    if (current_scope == NULL) {
+        printf("현재 스코프가 존재하지 않습니다.");
+        return ;
+    } else {
+        SymbolTable *old_scope = current_scope;
+        current_scope = current_scope->parent; //부모 스코프로 current_scope를 업데이트 해줌.
+        free_symbol_table(old_scope);
+        printf("old_scope 함수를 통해서 현재 스코프를 해제하고 이전 스코프로 복귀했습니다.\n");
+    }
+}
+

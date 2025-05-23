@@ -39,5 +39,6 @@ extern SymbolTable *current_scope; //현재 스코프를 가리키는 포인터
 SymbolTable* create_symbol_table(SymbolTable* parent);
 void free_symbol_table(SymbolTable* table);
 void init_symbol_system();
-
+void push_scope();
+void pop_scope();
 #endif

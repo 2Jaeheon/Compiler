@@ -23,6 +23,19 @@ int main() {
     current_scope = current_scope->parent;
     free_symbol_table(old_scope);
     printf("현재 스코프를 해제하고 이전 스코프로 복귀\n");
+    
+    // ========== push & pop 함수 테스트 ==========
 
+    init_symbol_system();  // 전역 스코프 초기화
+    printf("전역 스코프 초기화 완료\n");
+
+    push_scope(); // 첫 번째 블록 진입
+    push_scope(); // 중첩 블록 진입
+
+    pop_scope();  // 중첩 블록 탈출
+    pop_scope();  // 전역 스코프 복귀
+
+
+    
     return 0;
 }
