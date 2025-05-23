@@ -15,6 +15,7 @@ typedef struct TypeInfo {
     BaseType type; // 기본 타입
     struct TypeInfo *next; // 만약 포인터나 배열의 경우에는 기반 타입으로 연결
     char *struct_name; // 구조체 타입의 경우에는구조체 이름 
+    int array_size; // 배열의 경우에는 배열의 사이즈를 저장
 } TypeInfo;
 
 // 심볼은 하나의 스코프 단위에서 유일한 이름을 가진다.

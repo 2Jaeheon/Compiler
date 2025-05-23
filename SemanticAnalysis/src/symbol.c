@@ -119,3 +119,44 @@ Symbol* lookup_symbol(const char *name){
     printf("심볼이 존재하지 않습니다.");
     return NULL;
 }
+
+// 두 타입이 일치하는지를 비교하는 함수
+int is_same_type(TypeInfo *type1, TypeInfo *type2) {
+    // 둘 다 NULL이면 동일한 것
+    if (type1 == NULL && type2 == NULL) {
+        return 1;
+    }
+
+    // 한 쪽만 NULL이면 다른 타입
+    if (type1 == NULL || type2 == NULL) {
+        return 0;
+    }
+
+    // 타입의 종류가 다르면, 다른 타입
+    if (type1->type != type2->type) {
+        return 0;
+    }
+
+    // 구조체 타입의 경우에는 구조체 이름을 비교해줘야 함.
+    if (type1->type == TYPE_STRUCT) {
+        // 구조체 이름이 없으면, 다른 타입
+        if (type1->struct_name == NULL || type2->struct_name == NULL) {
+            return 0;
+        }
+        // 구조체 이름이 다르면, 다른 타입
+        if (strcmp(type1->struct_name, type2->struct_name) != 0) {
+            return 0;
+        }
+    }
+
+    // 배열 타입의 경우에는 배열의 사이즈를 비교해줘야 함.
+    if (type1->type == TYPE_ARRAY) {
+        if (type1->array_size != type2->array_size) {
+            return 0;
+        }
+    }
+
+    // 다음 타입 비교 (재귀 호출)
+    // 같은 타입이라면 바로 다음의 타입을 비교시키면 되는 것 => 재귀적으로 진행함.
+    return is_same_type(type1->next, type2->next);    
+}
