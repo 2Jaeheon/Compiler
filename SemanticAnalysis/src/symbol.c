@@ -42,12 +42,14 @@ void free_symbol_table(SymbolTable* table) {
     free(table);
 }
 
+// 새로운 스코프를 생성하고 진입
 void push_scope() {
     SymbolTable *new_scope = create_symbol_table(current_scope); //현재 스코프를 부모로 연결해줌.
     current_scope = new_scope;
     printf("push_scope 함수를 통해서 새로운 스코프를 생성하고 진입했습니다.\n");
 }
 
+// 현재 스코프를 해제하고 이전 스코프로 복귀
 void pop_scope() {
     if (current_scope == NULL) {
         printf("현재 스코프가 존재하지 않습니다.");
@@ -58,5 +60,29 @@ void pop_scope() {
         free_symbol_table(old_scope);
         printf("old_scope 함수를 통해서 현재 스코프를 해제하고 이전 스코프로 복귀했습니다.\n");
     }
+}
+
+int insert_symbol(const char *name, TypeInfo *type) {
+    // 중복 선언 검사
+    if(/*현재 스코프에 동일한 이름의 심볼이 존재하는지 검사*/) {
+        printf("중복 선언 오류: %s\n", name);
+        return 0;
+    }
+
+    // 새로운 심볼을 생성 및 삽입
+    // 심볼 메모리 할당
+    Symbol *new_symbol = (Symbol*)malloc(sizeof(Symbol));
+
+    // 심볼 초기화
+    new_symbol->name = strdup(name);
+    new_symbol->type = type;
+
+    // 심볼을 현재 스코프의 심볼 테이블에 추가
+    new_symbol->next = current_scope->symbols;
+    current_scope->symbols = new_symbol;
+
+    // 성공 반환
+    printf("심볼 삽입 완료: %s\n", name);
+    return 1;
 }
 
