@@ -12,7 +12,7 @@ CFLAGS = -g
 LDFLAGS = -lfl 
 YACCFLAGCS = -vd
 
-OBJECTS = lex.yy.o subc.tab.o
+OBJECTS = lex.yy.o subc.tab.o symbol.o
 
 all : subc
 

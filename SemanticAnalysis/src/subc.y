@@ -12,6 +12,7 @@
 int   yylex ();
 void   yyerror (char* s);
 int   get_lineno();
+void error_redeclaration(void);
 
 %}
 
@@ -19,8 +20,12 @@ int   get_lineno();
 
 /* yylval types */
 %union {
+  /* 토큰 타입 */
   int   intVal;
+  /* 문자열 타입 */
   char  *stringVal;
+  /* type_specifier는 타입 정보를 담는 구조체 포인터(TypeInfo*)를 전달 */
+  struct TypeInfo *typeInfo;
 }
 
 /* Precedences and Associativities */
@@ -39,12 +44,15 @@ int   get_lineno();
 %precedence ELSE
 
 /* Tokens and Types */
+/* terminal types: Flex(lexer)가 Bison(parser)에게 넘기는 터미널 토큰의 타입*/
 %token STRUCT RETURN WHILE FOR BREAK CONTINUE SYM_NULL
-%token TYPE
+%token<stringVal> TYPE
 %token CHAR_CONST
 %token STRING
 %token<intVal> INTEGER_CONST
-%token<stringVal> ID // identifier name
+%token<stringVal> ID  /* identifier name */
+/* non-terminal types: Bison 내부의 비터미널(non-terminal)이 계산된 결과($$)의 타입을 지정 */
+%type<typeInfo> type_specifier  /* type_specifier는 타입 정보를 담는 구조체 포인터(TypeInfo*)를 전달 */
 
 /* Grammar rules */
 %%
@@ -58,14 +66,38 @@ ext_def_list
   ;
 
 ext_def
-  : type_specifier pointers ID ';' 
-  | type_specifier pointers ID '[' INTEGER_CONST ']' ';' 
+  : type_specifier pointers ID ';' {
+    /* 타입 정보 생성 */
+    if (!insert_symbol($3, $1)) {
+      error_redeclaration();
+    }
+  }
+  | type_specifier pointers ID '[' INTEGER_CONST ']' ';' {
+    /* 타입 정보 생성 */
+    if (!insert_symbol($3, $1)) {
+      error_redeclaration();
+    }
+  }
   | struct_specifier ';' 
   | func_decl compound_stmt
   ;
 
 type_specifier
-  : TYPE 
+  : TYPE {
+    /* 타입 정보 생성 */
+    /* 만약 int 또는 char가 들어오면 해당 타입을 나타내는 TypeInfo를 생성해 반환 */
+    $$ = malloc(sizeof(TypeInfo));
+    /* 타입 정보 초기화 */
+    if (strcmp($1, "int") == 0) {
+      $$->type = TYPE_INT;
+    } else if (strcmp($1, "char") == 0) {
+      $$->type = TYPE_CHAR;
+    } else {
+      $$->type = TYPE_INT; 
+    }
+    $$->next = NULL;
+    $$->struct_name = NULL;
+  }
   | struct_specifier 
   ;
 
@@ -100,8 +132,19 @@ def_list
   ;
 
 def
-  : type_specifier pointers ID ';' 
-  | type_specifier pointers ID '[' INTEGER_CONST ']' ';' 
+  : type_specifier pointers ID ';' {
+    /* 타입 정보 생성 */
+    /* insert_symbol(이름, 타입)을 호출해 심볼 테이블에 추가 */
+    if (!insert_symbol($3, $1)) {
+      error_redeclaration();
+    }
+  }
+  | type_specifier pointers ID '[' INTEGER_CONST ']' ';' {
+    /* 타입 정보 생성 */
+    if (!insert_symbol($3, $1)) {
+      error_redeclaration();
+    }
+  }
   ;
 
 compound_stmt

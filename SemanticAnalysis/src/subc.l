@@ -33,7 +33,12 @@ special_char  \\[nt]
   /* This section contains series of rules for recognizing tokens. */
  
   /* Keywords */
-"int"|"char"                    { return TYPE; }
+"int"|"char"                    { 
+                                  /* 이게 없으면 Bison에서 $1이 NULL이 되어 세그폴트 발생 */
+                                  yylval.stringVal = strdup(yytext);
+                                  /* 타입 토큰을 반환 */
+                                  return TYPE; 
+                                }
 "struct"                        { return STRUCT; } 
 "NULL"                          { return SYM_NULL; }
 "return"                        { return RETURN; }
@@ -46,6 +51,9 @@ special_char  \\[nt]
 
   /* Identifiers */
 {id}                            {
+                                  /* 식별자 (변수명 등)는 ID 토큰으로 반환되고 문자열 값을 저장 */
+                                  yylval.stringVal = strdup(yytext);
+                                  /* 식별자 토큰을 반환 */
                                   return ID;
                                 }
 
@@ -113,7 +121,7 @@ int main(int argc, char* argv[]) {
     printf("Can't open input stream!\n");
     exit(1);
   }
-  
+  init_symbol_system();
   yyparse();
   fclose(yyin);
 
