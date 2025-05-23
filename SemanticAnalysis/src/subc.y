@@ -54,6 +54,9 @@ void error_undeclared(void);
 /* non-terminal types: Bison 내부의 비터미널(non-terminal)이 계산된 결과($$)의 타입을 지정 */
 %type<typeInfo> type_specifier  /* type_specifier는 타입 정보를 담는 구조체 포인터(TypeInfo*)를 전달 */
 %type<typeInfo> unary
+%type<typeInfo> expr
+%type<typeInfo> binary
+
 
 /* Grammar rules */
 %%
@@ -176,29 +179,100 @@ expr_e
   ;
 
 expr
-  : unary '=' expr 
-  | binary 
+  : unary '=' expr { /* 대입문을 분석할 때, 왼쪽과 오른쪽의 타입 검사 및 할당 가능한지를 체크하는 부분
+  만약 a가 선언되지 않았는데, lookup_symbol()을 통해 타입을 찾으려고 하면, 에러가 발생함.
+  따라서 이를 통해서 둘 중 하나라도 문제가 있는 경우에는 NULL을 반환하게 한다. */
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사 */
+      $$ = $1; /* 왼쪽 피연산자의 타입을 반환한다고 우선적으로 가정 */
+    }
+  }
+  | binary {
+    $$ = $1; /* binary의 결과를 그대로 넘김 */
+  }
   ;
 
 binary
-  : binary RELOP binary 
+  : binary RELOP binary { /* 하나가 NULL이면 무조건 NULL을 반환해줘야 함 */
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사함 */
+      $$ = $1;
+    }
+  }
   | binary EQUOP binary 
-  | binary '+' binary 
-  | binary '-' binary 
-  | binary '*' binary 
-  | binary '/' binary 
-  | binary '%' binary 
-  | unary %prec '=' 
-  | binary LOGICAL_AND binary 
-  | binary LOGICAL_OR binary 
+  | binary '+' binary {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사함 */
+      $$ = $1;
+    }
+  }
+  | binary '-' binary  {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사함 */
+      $$ = $1;
+    }
+  }
+  | binary '*' binary {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사함 */
+      $$ = $1;
+    }
+  }
+  | binary '/' binary {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사함 */
+      $$ = $1;
+    }
+  }
+  | unary %prec '=' {
+    $$ = $1;
+  }
+  | binary LOGICAL_AND binary  {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사함 */
+      $$ = $1;
+    }
+  }
+  | binary LOGICAL_OR binary {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else {
+      /* 타입을 검사함 */
+      $$ = $1;
+    }
+  }
   ;
 
 unary
-  : '(' expr ')' 
-  | '(' unary ')' 
-  | INTEGER_CONST 
-  | CHAR_CONST 
-  | STRING 
+  : '(' expr ')' {
+    $$ = $2;
+  }
+  | '(' unary ')' {
+    $$ = $2;
+  }
+  | INTEGER_CONST {
+    $$ = NULL;
+  }
+  | CHAR_CONST {
+    $$ = NULL;
+  }
+  | STRING {
+    $$ = NULL;
+  }
   | ID {
     /* ID를 사용할 때, 이전에 선언된 적이 있는 지 확인해야함. */
     Symbol *symbol = lookup_symbol($1);
@@ -209,20 +283,58 @@ unary
       $$ = symbol -> type;
     }
   }
-  | '-' unary %prec '!' 
-  | '!' unary 
+  | '-' unary %prec '!' {
+    if ($2 == NULL){
+      $$ = NULL;
+    } else {
+      $$ = $2;
+    }
+  }
+  | '!' unary {
+    if ($2 == NULL) {
+      $$ = NULL;
+    } else {
+      $$ = $2;
+    }
+  }
   | unary INCOP %prec STRUCTOP 
   | unary DECOP %prec STRUCTOP 
-  | INCOP unary %prec '!' 
-  | DECOP unary %prec '!' 
-  | '&' unary 
-  | '*' unary %prec '!' 
+  | INCOP unary %prec '!' {
+    if ($2 == NULL) {
+      $$ = NULL;
+    } else {
+      $$ = $2;
+    }
+  }
+  | DECOP unary %prec '!' {
+    if ($2 == NULL) {
+      $$ = NULL;
+    } else {
+      $$ = $2;
+    }
+  }
+  | '&' unary {
+    if ($2 == NULL) {
+      $$ = NULL;
+    } else {
+      $$ = $2;
+    }
+  }
+  | '*' unary %prec '!' {
+    if ($2 == NULL) {
+      $$ = NULL;
+    } else {
+      $$ = $2;
+    }
+  }
   | unary '[' expr ']' 
   | unary '.' ID 
   | unary STRUCTOP ID 
   | unary '(' args ')' 
   | unary '(' ')' 
-  | SYM_NULL 
+  | SYM_NULL {
+    $$ = NULL;
+  }
   ;
 
 args
