@@ -163,7 +163,7 @@ Nonterminals, with rules where they appear
     struct_specifier <typeInfo> (46)
         on left: 10 11
         on right: 6 9
-    func_decl (47)
+    func_decl <typeInfo> (47)
         on left: 12 13
         on right: 7
     pointers (48)
@@ -193,7 +193,7 @@ Nonterminals, with rules where they appear
     stmt (56)
         on left: 28 29 30 31 32 33 34 35 36 37
         on right: 26 34 35 36 37
-    expr_e (57)
+    expr_e <typeInfo> (57)
         on left: 38 39
         on right: 37
     expr <typeInfo> (58)

@@ -15,6 +15,8 @@ int   get_lineno();
 void error_redeclaration(void);
 void error_undeclared(void);
 void error_incompatible(void);
+void error_assignable(void);
+void error_indirection(void);
 %}
 
 /* Bison declarations section */
@@ -58,6 +60,8 @@ void error_incompatible(void);
 %type<typeInfo> unary
 %type<typeInfo> expr
 %type<typeInfo> binary
+%type<typeInfo> expr_e
+%type<typeInfo> func_decl
 
 
 /* Grammar rules */
@@ -85,7 +89,7 @@ ext_def
     }
   }
   | struct_specifier ';' 
-  | func_decl compound_stmt
+  | func_decl compound_stmt 
   ;
 
 type_specifier
@@ -94,6 +98,7 @@ type_specifier
     /* 만약 int 또는 char가 들어오면 해당 타입을 나타내는 TypeInfo를 생성해 반환 */
     $$ = malloc(sizeof(TypeInfo));
     /* 타입 정보 초기화 */
+    
     if (strcmp($1, "int") == 0) {
       $$->type = TYPE_INT;
     } else if (strcmp($1, "char") == 0) {
@@ -103,6 +108,8 @@ type_specifier
     }
     $$->next = NULL;
     $$->struct_name = NULL;
+    $$->array_size = 0;
+    $$->is_lvalue = 0;
   }
   | struct_specifier 
   ;
@@ -114,6 +121,7 @@ struct_specifier
     $$->struct_name = $2;
     $$->next = NULL;
     $$->array_size = 0;
+    $$->is_lvalue = 0;
   }
   | STRUCT ID {
     $$ = malloc(sizeof(TypeInfo));
@@ -121,6 +129,7 @@ struct_specifier
     $$->struct_name = $2;
     $$->next = NULL;
     $$->array_size = 0;
+    $$->is_lvalue = 0;
   }
   ;
 
@@ -193,7 +202,9 @@ stmt
 
 expr_e
   : expr 
-  | %empty 
+  | %empty {
+    $$ = NULL;
+  }
   ;
 
 expr
@@ -201,6 +212,9 @@ expr
   만약 a가 선언되지 않았는데, lookup_symbol()을 통해 타입을 찾으려고 하면, 에러가 발생함.
   따라서 이를 통해서 둘 중 하나라도 문제가 있는 경우에는 NULL을 반환하게 한다. */
     if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else if(!is_lvalue($1)) {
+      error_assignable(); /* 할당이 불가능 함 */
       $$ = NULL;
     } else if(!is_same_type($1, $3)) {
       error_incompatible();
@@ -275,6 +289,7 @@ binary
       $$ = $1;
     }
   }
+  
   ;
 
 unary
@@ -285,13 +300,28 @@ unary
     $$ = $2;
   }
   | INTEGER_CONST {
-    $$ = NULL;
+    $$ = malloc(sizeof(TypeInfo));
+    $$->type = TYPE_INT;
+    $$->is_lvalue = 0;
+    $$->next = NULL;
+    $$->struct_name = NULL;
+    $$->array_size = 0;
   }
   | CHAR_CONST {
-    $$ = NULL;
+    $$ = malloc(sizeof(TypeInfo));
+    $$->type = TYPE_CHAR;
+    $$->is_lvalue = 0;
+    $$->next = NULL;
+    $$->struct_name = NULL;
+    $$->array_size = 0;
   }
   | STRING {
-    $$ = NULL;
+    $$ = malloc(sizeof(TypeInfo));
+    $$->type = TYPE_INT;
+    $$->is_lvalue = 0;
+    $$->next = NULL;
+    $$->struct_name = NULL;
+    $$->array_size = 0;
   }
   | ID {
     /* ID를 사용할 때, 이전에 선언된 적이 있는 지 확인해야함. */
@@ -299,8 +329,9 @@ unary
     if (!symbol) {
       error_undeclared();
       $$ = NULL;
-    } else { /* 만일 선언된 적이 없다면, 심볼 테이블에서 해당 식별자의 타입을 찾아 반환 */
+    } else { 
       $$ = symbol -> type;
+      $$ -> is_lvalue = 1;
     }
   }
   | '-' unary %prec '!' {
@@ -343,8 +374,12 @@ unary
   | '*' unary %prec '!' {
     if ($2 == NULL) {
       $$ = NULL;
+    } else if($2 -> type != TYPE_POINTER) { /* 만일 $2의 타입이 포인터가 아니라면, 에러 메시지를 출력함 */
+      error_indirection();
+      $$ = NULL;
     } else {
-      $$ = $2;
+      $$ = $2 -> next; /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 포인터의 값을 가지고 있는 타입을 반환함 */
+      $$ -> is_lvalue = 1;  /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 lvalue로 처리함 */
     }
   }
   | unary '[' expr ']' 

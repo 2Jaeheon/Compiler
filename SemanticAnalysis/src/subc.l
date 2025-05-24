@@ -48,6 +48,10 @@ special_char  \\[nt]
 "for"                           { return FOR; }
 "break"                         { return BREAK; }
 "continue"                      { return CONTINUE; }
+"void"                          { 
+                                  yylval.stringVal = strdup(yytext); 
+                                  return TYPE; 
+                                }
 
   /* Identifiers */
 {id}                            {
@@ -86,7 +90,7 @@ special_char  \\[nt]
 "->"                            { return STRUCTOP; }
 
   /* Whitespaces */
-{whitespace}
+{whitespace}                    { /* do nothing */ }
 
 
   /* Comment blocks */

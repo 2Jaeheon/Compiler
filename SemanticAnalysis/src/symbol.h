@@ -16,6 +16,7 @@ typedef struct TypeInfo {
     struct TypeInfo *next; // 만약 포인터나 배열의 경우에는 기반 타입으로 연결
     char *struct_name; // 구조체 타입의 경우에는구조체 이름 
     int array_size; // 배열의 경우에는 배열의 사이즈를 저장
+    int is_lvalue; // 해당 타입이 lvalue인지 확인하는 플래그
 } TypeInfo;
 
 // 심볼은 하나의 스코프 단위에서 유일한 이름을 가진다.
@@ -46,5 +47,6 @@ int insert_symbol(const char* name, TypeInfo* type);
 int lookup_symbol_in_current_scope(const char* name);
 Symbol* lookup_symbol(const char *name);
 int is_same_type(TypeInfo* type1, TypeInfo* type2);
+int is_lvalue(TypeInfo *type);
 
 #endif

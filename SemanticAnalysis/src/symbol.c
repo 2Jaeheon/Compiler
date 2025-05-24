@@ -109,14 +109,14 @@ Symbol* lookup_symbol(const char *name){
         while(symbol != NULL) {
             // 심볼 이름이 일치하는지 확인
             if (strcmp(symbol->name, name) == 0) {
-                printf("심볼이 존재합니다.");
+                printf("심볼이 존재합니다. 심볼 이름: %s\n", name);
                 return symbol;
             }
             symbol = symbol->next;
         }
         scope = scope->parent;
     }
-    printf("심볼이 존재하지 않습니다.");
+    printf("심볼이 존재하지 않습니다. 심볼 이름: %s\n", name);
     return NULL;
 }
 
@@ -159,4 +159,12 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
     // 다음 타입 비교 (재귀 호출)
     // 같은 타입이라면 바로 다음의 타입을 비교시키면 되는 것 => 재귀적으로 진행함.
     return is_same_type(type1->next, type2->next);    
+}
+
+// LHS의 lvalue 여부를 판단하는 함수
+int is_lvalue(TypeInfo *type) {
+    if (type == NULL) {
+        return 0;
+    }
+    return type->is_lvalue;
 }
