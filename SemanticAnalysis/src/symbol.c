@@ -6,6 +6,7 @@
 SymbolTable* current_scope = NULL;
 ParamList* current_param_list = NULL;
 StructType* global_type_list = NULL;
+FuncInfo* global_func_list = NULL;
 
 // 새로운 스코프를 생성
 SymbolTable* create_symbol_table(SymbolTable* parent) {
@@ -378,5 +379,25 @@ int is_comparable_type(TypeInfo* type1, TypeInfo* type2) {
         return 1;
     }
     return 0;
+}
+
+// 함수 중복 선언 확인
+int is_func_declared(char* name) {
+    FuncInfo* current = global_func_list;
+    while (current != NULL) {
+        if (strcmp(current->name, name) == 0) return 1;
+        current = current->next;
+    }
+    return 0;
+}
+
+// 함수 정보 삽입
+void insert_func_info(char* name, TypeInfo* return_type, ParamList* param_list) {
+    FuncInfo* new_func = malloc(sizeof(FuncInfo));
+    new_func->name = strdup(name);
+    new_func->return_type = deep_copy_typeinfo(return_type);
+    new_func->param_list = param_list;
+    new_func->next = global_func_list;
+    global_func_list = new_func;
 }
 

@@ -209,21 +209,42 @@ struct_specifier
 
 func_decl
   : type_specifier pointers ID '(' ')' {
-    if (!insert_symbol($3, $1)) {
-        error_redeclaration();
-        current_param_list = NULL; 
-        $$ = NULL; 
+    TypeInfo* final_type = $1;
+    if($2 != NULL) {
+      $2->next = $1;
+      final_type = $2;
+    }
+
+    if(!insert_symbol($3, final_type)) {
+      error_redeclaration();
+
+      $$ = NULL;
+    } else if(is_func_declared($3)) {
+      error_redeclaration();
+      $$ = NULL;
     } else {
-        $$ = NULL;
+      insert_func_info($3, final_type, NULL);
+      $$ = NULL;
     }
   }
   | type_specifier pointers ID '(' param_list ')' {
-    if (!insert_symbol($3, $1)) {
-        error_redeclaration();
-        current_param_list = NULL; 
-        $$ = NULL;
+    TypeInfo* final_type = $1;
+    if ($2 != NULL) {
+      $2->next = $1;
+      final_type = $2;
+    }
+
+    current_param_list = $5;
+
+    if (is_func_declared($3)) {
+      error_redeclaration();
+      $$ = NULL;
     } else {
-         current_param_list = $5;
+      insert_func_info($3, final_type, $5);
+      if (!insert_symbol($3, final_type)) {
+        error_redeclaration();
+      }
+      $$ = NULL;
     }
   }
   ;

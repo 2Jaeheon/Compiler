@@ -59,12 +59,21 @@ typedef struct StructType {
     struct StructType *next;
 } StructType;
 
+// 함수 저장
+typedef struct FuncInfo {
+    char *name;
+    TypeInfo *return_type;
+    ParamList *param_list;
+    struct FuncInfo *next;
+} FuncInfo;
+
 
 
 // extern 키워드를 사용하여 외부에서 접근 가능하도록 선언
 extern SymbolTable *current_scope; //현재 스코프를 가리키는 포인터
 extern ParamList* current_param_list; // 현재 함수의 파라미터 리스트를 가리키는 포인터
 extern StructType* global_type_list; // 전역으로 선언된 구조체 정보 저장하는 구조체
+extern FuncInfo* global_func_list; // 전역으로 선언된 함수 정보 저장하는 구조체
 
 /* ========== 함수 선언 ========== */
 // 함수 선언
@@ -91,5 +100,9 @@ FieldInfo* deep_copy_field_list(FieldInfo* src);
 int is_arithmetic_type(TypeInfo* type);
 int is_boolean_type(TypeInfo* type);
 int is_comparable_type(TypeInfo* type1, TypeInfo* type2);
+int is_func_declared(char* name);
+void insert_func_info(char* name, TypeInfo* return_type, ParamList* param_list);
+FuncInfo* find_func_info(const char* name);
+int is_same_param_list(ParamList* p1, ParamList* p2);
 
 #endif
