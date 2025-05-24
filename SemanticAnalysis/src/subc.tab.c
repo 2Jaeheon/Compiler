@@ -2232,12 +2232,8 @@ yyreturnlab:
 
 /* Epilogue section */
 
-// Print the preamble of error message.
 void error_preamble(void) {
-  // TODO
-  // Implement this function using get_lineno() function.
-  // need to get the filename too
-  printf("%s:%d: error: ", "filename", 1234);
+  printf("%s:%d: error: ", current_filename, get_lineno());
 }
 
 void error_undeclared(void) {

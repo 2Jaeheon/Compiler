@@ -75,6 +75,8 @@ extern ParamList* current_param_list; // 현재 함수의 파라미터 리스트
 extern StructType* global_type_list; // 전역으로 선언된 구조체 정보 저장하는 구조체
 extern FuncInfo* global_func_list; // 전역으로 선언된 함수 정보 저장하는 구조체
 extern TypeInfo* current_function_return_type; // 현재 함수의 반환 타입을 가리키는 포인터
+extern char* current_filename; // 현재 파일 이름을 저장하는 변수
+
 /* ========== 함수 선언 ========== */
 // 함수 선언
 SymbolTable* create_symbol_table(SymbolTable* parent);

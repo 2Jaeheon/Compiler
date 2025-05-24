@@ -116,6 +116,7 @@ int get_lineno() {
 
 int main(int argc, char* argv[]) {
   if(argc >= 2) {
+    current_filename = strdup(argv[1]);
     yyin = fopen(argv[1], "r");
   } else {
     yyin = stdin;
