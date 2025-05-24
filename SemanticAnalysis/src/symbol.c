@@ -199,22 +199,32 @@ ParamList* create_param_list() {
 }
 
 // 파라미터 추가
-void add_param(ParamList* list, const char* name, TypeInfo* type) {
+int add_param(ParamList* list, const char* name, TypeInfo* type) {
+
+    // 파라미터 리스트가 비어있지 않으면, 중복된 이름이 있는지 확인함.
+    // 리스트의 tail 노드의 next 포인터를 현재 추가한 파라미터 노드로 업데이트
+    ParamNode* curr = list->head;
+    while (curr != NULL) {
+        if (strcmp(curr->name, name) == 0) {
+            return 0;  // 삽입 중단
+        }
+        curr = curr->next;
+    }
+
     // 파라미터 노드 메모리 할당
     ParamNode* node = (ParamNode*)malloc(sizeof(ParamNode));
     node->name = strdup(name);
     node->type = deep_copy_typeinfo(type);
     node->next = NULL;
 
-    // 파라미터 리스트가 비어있지 않으면, 리스트의 tail 노드의 next 포인터를 현재 추가한 파라미터 노드로 업데이트
+    // 파라미터 리스트에 추가
     if(list->tail != NULL) {
-        // 파라미터 리스트의 tail 노드의 next 포인터를 현재 추가한 파라미터 노드로 업데이트
         list->tail->next = node;
-    } else { // 파라미터 리스트가 비어있으면, 파라미터 리스트의 head 노드를 현재 추가한 파라미터 노드로 업데이트
+    } else {
         list->head = node;
     }
-    // 파라미터 리스트의 테일을 현재 추가한 파라미터 노드로 업데이트
     list->tail = node;
+    return 1;
 }
 
 void insert_param_list_to_scope(ParamList* list){
@@ -222,11 +232,7 @@ void insert_param_list_to_scope(ParamList* list){
 
     // 파라미터 리스트의 모든 노드를 순회하면서 심볼 테이블에 추가
     while(current_node != NULL) {
-        if(!insert_symbol(current_node->name, current_node->type)){
-            // 중복 선언 오류 발생 시, 에러 메시지 출력
-            printf("중복 선언 오류: %s\n", current_node->name);
-        }
-        // 다음 노드로 이동
+        insert_symbol(current_node->name, current_node->type);
         current_node = current_node->next;
     }
 }

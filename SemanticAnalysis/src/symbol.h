@@ -88,7 +88,7 @@ Symbol* lookup_symbol(const char *name);
 int is_same_type(TypeInfo* type1, TypeInfo* type2);
 int is_lvalue(TypeInfo *type);
 ParamList* create_param_list();
-void add_param(ParamList* list, const char* name, TypeInfo* type);
+int add_param(ParamList* list, const char* name, TypeInfo* type);
 void insert_param_list_to_scope(ParamList* list);
 void error_redeclaration(); 
 FieldInfo* convert_scope_to_filed_list();

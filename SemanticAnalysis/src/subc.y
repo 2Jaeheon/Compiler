@@ -280,19 +280,28 @@ param_decl
   : type_specifier pointers ID {
     if ($1 == NULL) {
       error_incomplete();
+      $$ = NULL;
     } else {
       $$ = create_param_list();
-      add_param($$, $3, $1); 
+      if(!add_param($$, $3, $1)) {
+        error_redeclaration();
+        $$ = NULL;
+      }
     }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' {
     if ($1 == NULL) {
       error_incomplete();
+      $$ = NULL;
     } else {
       TypeInfo* param_type = deep_copy_typeinfo($1);
       param_type -> array_size = $5;
+
       $$ = create_param_list();
-      add_param($$, $3, param_type);
+      if(!add_param($$, $3, param_type)) {
+        error_redeclaration();
+        $$ = NULL;
+      }
     }
   }
   ;
@@ -340,9 +349,15 @@ compound_stmt
   : '{' {
     push_scope();
     if (current_param_list != NULL) {
-      insert_param_list_to_scope(current_param_list);
-      current_param_list = NULL;
-    }
+        ParamNode* cur = current_param_list->head;
+        while (cur != NULL) {
+          if (!insert_symbol(cur->name, cur->type)) {
+            error_redeclaration();
+          }
+          cur = cur->next;
+        }
+        current_param_list = NULL;
+      }
   } def_list stmt_list '}' {
     pop_scope();
   }
