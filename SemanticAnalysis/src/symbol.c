@@ -136,6 +136,12 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
         return 0;
     }
 
+    if ((type1->type == TYPE_NULLPTR && type2->type == TYPE_POINTER) ||
+        (type2->type == TYPE_NULLPTR && type1->type == TYPE_POINTER)) {
+        return 1;
+    }
+
+
     // 타입의 종류가 다르면, 다른 타입
     if (type1->type != type2->type) {
         printf("타입 비교 실패: 타입 종류가 다름\n");

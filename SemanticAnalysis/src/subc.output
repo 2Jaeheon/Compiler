@@ -167,7 +167,7 @@ Nonterminals, with rules where they appear
     func_decl <typeInfo> (48)
         on left: 13 14
         on right: 7
-    pointers (49)
+    pointers <typeInfo> (49)
         on left: 15 16
         on right: 4 5 13 14 19 20 23 24
     param_list <paramList> (50)

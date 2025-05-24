@@ -1,6 +1,6 @@
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
-
+#define TYPE_NULLPTR 999
 /* ========== 전역 변수 ========== */
 
 typedef enum BaseType {

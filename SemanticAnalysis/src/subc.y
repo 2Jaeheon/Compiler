@@ -30,7 +30,8 @@ void error_unary(void);
 void error_arguments(void);
 void error_function(void);
 void error_arguments(void);
-
+void error_null(void);
+void error_addressof(void);
 %}
 
 /* Bison declarations section */
@@ -78,6 +79,7 @@ void error_arguments(void);
 %type<typeInfo> expr_e
 %type<typeInfo> func_decl
 %type<paramList> param_list param_decl
+%type<typeInfo> pointers
 
 /* Grammar rules */
 %%
@@ -92,9 +94,15 @@ ext_def_list
 
 ext_def
   : type_specifier pointers ID ';' { 
-    if($1 == NULL) {
+    TypeInfo* final_type = $1;
+    if($2 != NULL) {
+      $2->next = $1;
+      final_type = $2;
+    }
+    
+    if(final_type == NULL) {
       error_incomplete();
-    } else if (!insert_symbol($3, $1)) {
+    } else if (!insert_symbol($3, final_type)) {
       error_redeclaration();
     }
   }
@@ -209,8 +217,17 @@ func_decl
   ;
 
 pointers
-  : '*' 
-  | %empty 
+  : '*' {
+    $$ = malloc(sizeof(TypeInfo));
+    $$->type = TYPE_POINTER;
+    $$->next = NULL;
+    $$->is_lvalue = 0;
+    $$->struct_name = NULL;
+    $$->array_size = 0;
+  }
+  | %empty {
+    $$ = NULL;
+  }
   ;
 
 param_list  
@@ -254,9 +271,15 @@ def_list
 
 def
   : type_specifier pointers ID ';' {
-    if ($1 == NULL) {
+    TypeInfo* final_type = $1;
+    if($2 != NULL) {
+      $2->next = $1;
+      final_type = $2;
+    }
+
+    if(final_type == NULL) {
       error_incomplete();
-    } else if (!insert_symbol($3, $1)) {
+    } else if (!insert_symbol($3, final_type)) {
       error_redeclaration();
     }
   }
@@ -313,6 +336,9 @@ expr
       $$ = NULL;
     } else if(!is_lvalue($1)) {
       error_assignable(); /* 할당이 불가능 함 */
+      $$ = NULL;
+    } else if($3->type == TYPE_NULLPTR && $1->type != TYPE_POINTER) {
+      error_null();
       $$ = NULL;
     } else if(!is_same_type($1, $3)) {
       error_incompatible();
@@ -514,8 +540,16 @@ unary
   | '&' unary {
     if ($2 == NULL) {
       $$ = NULL;
+    } else if(!is_lvalue($2)) {
+      error_addressof();
+      $$ = NULL;
     } else {
-      $$ = $2;
+      $$ = malloc(sizeof(TypeInfo));
+      $$->type = TYPE_POINTER;
+      $$->next = deep_copy_typeinfo($2);
+      $$->is_lvalue = 0;
+      $$->struct_name = NULL;
+      $$->array_size = 0;
     }
   }
   | '*' unary %prec '!' {
@@ -570,7 +604,12 @@ unary
   | unary '(' args ')' 
   | unary '(' ')' 
   | SYM_NULL {
-    $$ = NULL;
+    $$ = malloc(sizeof(TypeInfo));
+    $$->type = TYPE_NULLPTR;
+    $$->next = NULL;
+    $$->is_lvalue = 0;
+    $$->struct_name = NULL;
+    $$->array_size = 0;
   }
   ;
 
