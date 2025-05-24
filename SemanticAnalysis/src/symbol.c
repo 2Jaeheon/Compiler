@@ -212,3 +212,36 @@ void insert_param_list_to_scope(ParamList* list){
         current_node = current_node->next;
     }
 }
+
+// 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환함.
+FieldInfo* convert_scope_to_filed_list() {
+    if (current_scope == NULL) {
+        return NULL;
+    }
+
+    Symbol *symbol = current_scope -> symbols;
+    FieldInfo *head = NULL;
+    FieldInfo *tail = NULL;
+
+    // 스코프 내의 모든 심볼들을 순회하면서 fieldInfo 리스트로 변환
+    while(symbol != NULL) {
+        FieldInfo* field = (FieldInfo*)malloc(sizeof(FieldInfo));
+        field->name = strdup(symbol->name);
+        field->type = symbol->type;
+        field->next = NULL;
+
+        // 첫 번째 필드인 경우
+        if(head == NULL) {
+            head = tail = field;
+        } else { // 두 번째 이후 필드인 경우
+            tail->next = field;
+            tail = field;
+        }
+
+        // 다음 심볼로 이동
+        symbol = symbol->next;
+    }
+
+    // 변환된 필드 리스트 반환
+    return head;
+}

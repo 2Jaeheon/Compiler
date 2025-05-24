@@ -17,6 +17,7 @@ typedef struct TypeInfo {
     char *struct_name; // 구조체 타입의 경우에는구조체 이름 
     int array_size; // 배열의 경우에는 배열의 사이즈를 저장
     int is_lvalue; // 해당 타입이 lvalue인지 확인하는 플래그
+    struct FieldInfo *field_list; // 구조체 필드 리스트
 } TypeInfo;
 
 // 심볼은 하나의 스코프 단위에서 유일한 이름을 가진다.
@@ -32,9 +33,6 @@ typedef struct SymbolTable {
     struct SymbolTable *parent; // 상위 스코프 연결 -> 이를 통해서 SymbolTable을 연결시켜 스택처럼 연결함.
 } SymbolTable;
 
-// extern 키워드를 사용하여 외부에서 접근 가능하도록 선언
-
-
 // Parameter들 저장하는 구조체
 typedef struct ParamNode {
     char* name;
@@ -47,6 +45,16 @@ typedef struct ParamList {
     ParamNode* tail;
 } ParamList;
 
+// 구조체 필드 정보 저장하는 구조체
+typedef struct FieldInfo {
+    char *name;
+    TypeInfo* type;
+    struct FieldInfo* next;
+} FieldInfo;
+
+
+
+// extern 키워드를 사용하여 외부에서 접근 가능하도록 선언
 extern SymbolTable *current_scope; //현재 스코프를 가리키는 포인터
 extern ParamList* current_param_list; // 현재 함수의 파라미터 리스트를 가리키는 포인터
 
@@ -67,4 +75,5 @@ ParamList* create_param_list();
 void add_param(ParamList* list, const char* name, TypeInfo* type);
 void insert_param_list_to_scope(ParamList* list);
 void error_redeclaration(); 
+FieldInfo* convert_scope_to_filed_list();
 #endif

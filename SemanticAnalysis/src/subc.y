@@ -116,21 +116,31 @@ type_specifier
   ;
 
 struct_specifier
-  : STRUCT ID '{' def_list '}' {
+  : STRUCT ID '{' {
+    push_scope();
+  } def_list '}' {
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_STRUCT;
     $$->struct_name = $2;
     $$->next = NULL;
     $$->array_size = 0;
     $$->is_lvalue = 0;
+
+    /* 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환 */
+    $$->field_list = convert_scope_to_filed_list();
+
+    /* 스코프 종료 */
+    pop_scope();
   }
   | STRUCT ID {
+    /* 단순한 구조체 선언( struct S; 와 같은 경우) */
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_STRUCT;
     $$->struct_name = $2;
     $$->next = NULL;
     $$->array_size = 0;
     $$->is_lvalue = 0;
+    $$->field_list = NULL;
   }
   ;
 
