@@ -9,6 +9,7 @@ StructType* global_type_list = NULL;
 FuncInfo* global_func_list = NULL;
 TypeInfo* current_function_return_type = NULL;
 char* current_filename = NULL;
+int error_lineno = -1;
 
 // 새로운 스코프를 생성
 SymbolTable* create_symbol_table(SymbolTable* parent) {
@@ -51,26 +52,26 @@ void free_symbol_table(SymbolTable* table) {
 void push_scope() {
     SymbolTable *new_scope = create_symbol_table(current_scope); //현재 스코프를 부모로 연결해줌.
     current_scope = new_scope;
-    printf("push_scope 함수를 통해서 새로운 스코프를 생성하고 진입했습니다.\n");
+    // printf("push_scope 함수를 통해서 새로운 스코프를 생성하고 진입했습니다.\n");
 }
 
 // 현재 스코프를 해제하고 이전 스코프로 복귀
 void pop_scope() {
     if (current_scope == NULL) {
-        printf("현재 스코프가 존재하지 않습니다.");
+        // printf("현재 스코프가 존재하지 않습니다.");
         return ;
     } else {
         SymbolTable *old_scope = current_scope;
         current_scope = current_scope->parent; //부모 스코프로 current_scope를 업데이트 해줌.
         free_symbol_table(old_scope);
-        printf("old_scope 함수를 통해서 현재 스코프를 해제하고 이전 스코프로 복귀했습니다.\n");
+        // printf("old_scope 함수를 통해서 현재 스코프를 해제하고 이전 스코프로 복귀했습니다.\n");
     }
 }
 
 int insert_symbol(const char *name, TypeInfo *type) {
     // 중복 선언 검사
     if(lookup_symbol_in_current_scope(name)) {
-        printf("중복 선언 오류: %s\n", name);
+        // printf("중복 선언 오류: %s\n", name);
         return 0;
     }
 
@@ -87,7 +88,7 @@ int insert_symbol(const char *name, TypeInfo *type) {
     current_scope->symbols = new_symbol;
 
     // 성공 반환
-    printf("심볼 삽입 완료: %s\n", name);
+    // printf("심볼 삽입 완료: %s\n", name);
     return 1;
 }
 
@@ -114,14 +115,14 @@ Symbol* lookup_symbol(const char *name){
         while(symbol != NULL) {
             // 심볼 이름이 일치하는지 확인
             if (strcmp(symbol->name, name) == 0) {
-                printf("심볼이 존재합니다. 심볼 이름: %s\n", name);
+                // printf("심볼이 존재합니다. 심볼 이름: %s\n", name);
                 return symbol;
             }
             symbol = symbol->next;
         }
         scope = scope->parent;
     }
-    printf("심볼이 존재하지 않습니다. 심볼 이름: %s\n", name);
+    // printf("심볼이 존재하지 않습니다. 심볼 이름: %s\n", name);
     return NULL;
 }
 
@@ -129,13 +130,13 @@ Symbol* lookup_symbol(const char *name){
 int is_same_type(TypeInfo *type1, TypeInfo *type2) {
     // 둘 다 NULL이면 동일한 것
     if (type1 == NULL && type2 == NULL) {
-        printf("타입 비교 실패: 둘 다 NULL\n");
+        // printf("타입 비교 실패: 둘 다 NULL\n");
         return 1;
     }
 
     // 한 쪽만 NULL이면 다른 타입
     if (type1 == NULL || type2 == NULL) {
-        printf("타입 비교 실패: 한 쪽만 NULL\n");
+        // printf("타입 비교 실패: 한 쪽만 NULL\n");
         return 0;
     }
 
@@ -147,7 +148,7 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
 
     // 타입의 종류가 다르면, 다른 타입
     if (type1->type != type2->type) {
-        printf("타입 비교 실패: 타입 종류가 다름\n");
+        // printf("타입 비교 실패: 타입 종류가 다름\n");
         return 0;
     }
 
@@ -155,12 +156,12 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
     if (type1->type == TYPE_STRUCT) {
         // 구조체 이름이 없으면, 다른 타입
         if (type1->struct_name == NULL || type2->struct_name == NULL) {
-            printf("타입 비교 실패: 구조체 이름이 없음\n");
+            // printf("타입 비교 실패: 구조체 이름이 없음\n");
             return 0;
         }
         // 구조체 이름이 다르면, 다른 타입
         if (strcmp(type1->struct_name, type2->struct_name) != 0) {
-            printf("타입 비교 실패: 구조체 이름이 다름\n");
+            // printf("타입 비교 실패: 구조체 이름이 다름\n");
             return 0;
         }
     }
@@ -168,7 +169,7 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
     // 배열 타입의 경우에는 배열의 사이즈를 비교해줘야 함.
     if (type1->type == TYPE_ARRAY) {
         if (type1->array_size != type2->array_size) {
-            printf("타입 비교 실패: 배열 사이즈가 다름\n");
+            // printf("타입 비교 실패: 배열 사이즈가 다름\n");
             return 0;
         }
     }
@@ -253,7 +254,7 @@ FieldInfo* convert_scope_to_filed_list() {
     while(symbol != NULL) {
         FieldInfo* field = (FieldInfo*)malloc(sizeof(FieldInfo));
         field->name = strdup(symbol->name);
-        field->type = symbol->type;
+        field->type = deep_copy_typeinfo(symbol->type);
         field->next = NULL;
 
         // 첫 번째 필드인 경우
@@ -298,31 +299,31 @@ void register_struct_type(const char *name, FieldInfo *field_list) {
 // 예를 들어서 a.b 이럴 때 탐색해야함
 TypeInfo* find_field_type(TypeInfo *struct_type, const char *field_name) {
     if (!struct_type) {
-        printf("구조체 타입이 아닙니다.\n");
+        // printf("구조체 타입이 아닙니다.\n");
         return NULL;
     }
     
     if (struct_type->type != TYPE_STRUCT) {
-        printf("구조체 타입이 아닙니다.\n");
+        // printf("구조체 타입이 아닙니다.\n");
         return NULL;
     }
     
     if (!struct_type->field_list) {
-        printf("필드 리스트가 없습니다.\n");
+        // printf("필드 리스트가 없습니다.\n");
         return NULL;
     }
 
     FieldInfo *field = struct_type->field_list;
-
+    
     while(field != NULL) {
-        printf(" 필드 탐색 중: %s\n", field->name);
+        // printf(" 필드 탐색 중: %s\n", field->name);
         if (strcmp(field->name, field_name) == 0) {
-            printf("필드 일치: %s\n", field->name);
+            // printf("필드 일치: %s\n", field->name);
             return field->type;
         }
         field = field->next;
     }
-    printf("필드를 찾을 수 없습니다: %s\n", field_name);
+    // printf("필드를 찾을 수 없습니다: %s\n", field_name);
     return NULL;
 }
 
@@ -408,4 +409,3 @@ void insert_func_info(char* name, TypeInfo* return_type, ParamList* param_list) 
     new_func->next = global_func_list;
     global_func_list = new_func;
 }
-

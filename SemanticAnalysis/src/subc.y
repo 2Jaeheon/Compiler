@@ -152,6 +152,7 @@ type_specifier
 
 struct_specifier
   : STRUCT ID '{' {
+    error_lineno = get_lineno();
     push_scope();
   } def_list '}' {
     if(is_redelcare_struct($2)) {
@@ -578,9 +579,6 @@ unary
     } else { 
       $$ = deep_copy_typeinfo(symbol -> type);
       $$ -> is_lvalue = 1;
-
-      printf("ID %s 타입: %d, 구조체 이름: %s\n", $1, $$->type, $$->struct_name ? $$->struct_name : "NULL");
-
     }
   }
   | '-' unary %prec '!' {
@@ -631,12 +629,13 @@ unary
   | '*' unary %prec '!' {
     if ($2 == NULL) {
       $$ = NULL;
-    } else if($2 -> type != TYPE_POINTER) { /* 만일 $2의 타입이 포인터가 아니라면, 에러 메시지를 출력함 */
+    } else if($2 -> type != TYPE_POINTER) {
+      error_lineno = get_lineno();
       error_indirection();
       $$ = NULL;
     } else {
-      $$ = $2 -> next; /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 포인터의 값을 가지고 있는 타입을 반환함 */
-      $$ -> is_lvalue = 1;  /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 lvalue로 처리함 */
+      $$ = $2 -> next;
+      $$ -> is_lvalue = 1;
     }
   }
   | unary '[' expr ']' {
@@ -654,15 +653,17 @@ unary
     }
   }
   | unary '.' ID {
-    if($1 == NULL) {
+    if ($1 == NULL) {
       $$ = NULL;
     } else if($1->type != TYPE_STRUCT) {
-      error_struct();
+      error_lineno = get_lineno(); // 여기에서 라인번호 기록
+      error_incompatible(); 
       $$ = NULL;
     } else {
       TypeInfo *field_type = find_field_type($1, $3);
 
       if(field_type == NULL) {
+        error_lineno = get_lineno(); // 필드 없을 때도 마찬가지
         error_member();
         $$ = NULL;
       } else {
@@ -712,7 +713,12 @@ args
 /* Epilogue section */
 
 void error_preamble(void) {
-  printf("%s:%d: error: ", current_filename, get_lineno());
+  if (error_lineno != -1) {
+    printf("%s:%d: error: ", current_filename, error_lineno);
+  } else {
+    printf("%s:%d: error: ", current_filename, get_lineno());
+  }
+  error_lineno = -1;
 }
 
 void error_undeclared(void) {
