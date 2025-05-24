@@ -213,9 +213,10 @@ param_decl
     add_param($$, $3, $1); 
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' {
-    $1 -> array_size = $5;
+    TypeInfo* param_type = deep_copy_typeinfo($1);
+    param_type -> array_size = $5;
     $$ = create_param_list();
-    add_param($$, $3, $1);
+    add_param($$, $3, param_type);
   }
   ;
 
@@ -400,7 +401,7 @@ unary
       error_undeclared();
       $$ = NULL;
     } else { 
-      $$ = symbol -> type;
+      $$ = deep_copy_typeinfo(symbol -> type);
       $$ -> is_lvalue = 1;
 
       printf("ID %s 타입: %d, 구조체 이름: %s\n", $1, $$->type, $$->struct_name ? $$->struct_name : "NULL");
@@ -469,8 +470,7 @@ unary
         error_member();
         $$ = NULL;
       } else {
-        $$ = malloc(sizeof(TypeInfo));
-        memcpy($$, field_type, sizeof(TypeInfo));
+        $$ = deep_copy_typeinfo(field_type);
         $$->is_lvalue = 1;
       }
     }
@@ -489,8 +489,7 @@ unary
         error_member();
         $$ = NULL;
       } else {
-        $$ = malloc(sizeof(TypeInfo));
-        memcpy($$, field_type, sizeof(TypeInfo));
+        $$ = deep_copy_typeinfo(field_type);
         $$->is_lvalue = 1;
       }
     }

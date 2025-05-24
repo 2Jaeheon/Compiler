@@ -77,7 +77,7 @@ int insert_symbol(const char *name, TypeInfo *type) {
 
     // 심볼 초기화
     new_symbol->name = strdup(name);
-    new_symbol->type = type;
+    new_symbol->type = deep_copy_typeinfo(type);
 
     // 심볼을 현재 스코프의 심볼 테이블에 추가
     new_symbol->next = current_scope->symbols;
@@ -196,7 +196,7 @@ void add_param(ParamList* list, const char* name, TypeInfo* type) {
     // 파라미터 노드 메모리 할당
     ParamNode* node = (ParamNode*)malloc(sizeof(ParamNode));
     node->name = strdup(name);
-    node->type = type;
+    node->type = deep_copy_typeinfo(type);
     node->next = NULL;
 
     // 파라미터 리스트가 비어있지 않으면, 리스트의 tail 노드의 next 포인터를 현재 추가한 파라미터 노드로 업데이트
@@ -309,4 +309,48 @@ TypeInfo* find_field_type(TypeInfo *struct_type, const char *field_name) {
     }
     printf("필드를 찾을 수 없습니다: %s\n", field_name);
     return NULL;
+}
+
+
+// 깊은 복사
+TypeInfo* deep_copy_typeinfo(TypeInfo* src) {
+    if(src == NULL) {
+        return NULL;
+    }
+
+    TypeInfo* dst = malloc(sizeof(TypeInfo));
+    dst->type = src->type;
+    dst->next = deep_copy_typeinfo(src->next);
+    dst->struct_name = src->struct_name ? strdup(src->struct_name) : NULL;
+    dst->array_size = src->array_size;
+    dst->is_lvalue = src->is_lvalue;
+    dst->field_list = deep_copy_field_list(src->field_list);
+
+    return dst;
+}
+
+FieldInfo* deep_copy_field_list(FieldInfo* src) {
+    if(src == NULL) {
+        return NULL;
+    }
+
+    FieldInfo* head = NULL;
+    FieldInfo* tail = NULL;
+
+    while(src != NULL) {
+        FieldInfo* field = malloc(sizeof(FieldInfo));
+        field->name = strdup(src->name);
+        field->type = deep_copy_typeinfo(src->type);
+        field->next = NULL;
+
+        if(tail != NULL) {
+            tail->next = field;
+        } else {
+            head = field;
+        }
+        tail = field;
+        src = src->next;
+    }
+
+    return head;
 }
