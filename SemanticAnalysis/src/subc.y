@@ -24,6 +24,12 @@ void error_array(void);
 void error_subscript(void);
 void error_incomplete(void);
 void error_return(void);
+void error_comparable(void);
+void error_binary(void);
+void error_unary(void);
+void error_arguments(void);
+void error_function(void);
+void error_arguments(void);
 
 %}
 
@@ -86,8 +92,9 @@ ext_def_list
 
 ext_def
   : type_specifier pointers ID ';' { 
-    /* 타입 정보 생성 */
-    if (!insert_symbol($3, $1)) {
+    if($1 == NULL) {
+      error_incomplete();
+    } else if (!insert_symbol($3, $1)) {
       error_redeclaration();
     }
   }
@@ -165,6 +172,18 @@ struct_specifier
       current = current->next;
     }
     
+    if (current == NULL) {
+      error_undeclared();
+      $$ = NULL;
+    } else {
+      $$ = malloc(sizeof(TypeInfo));
+      $$->type = TYPE_STRUCT;
+      $$->struct_name = $2;
+      $$->next = NULL;
+      $$->array_size = 0;
+      $$->is_lvalue = 0;
+      $$->field_list = current->field_list;
+    }
   }
   ;
 
@@ -209,14 +228,22 @@ param_list
 
 param_decl 
   : type_specifier pointers ID {
-    $$ = create_param_list();
-    add_param($$, $3, $1); 
+    if ($1 == NULL) {
+      error_incomplete();
+    } else {
+      $$ = create_param_list();
+      add_param($$, $3, $1); 
+    }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' {
-    TypeInfo* param_type = deep_copy_typeinfo($1);
-    param_type -> array_size = $5;
-    $$ = create_param_list();
-    add_param($$, $3, param_type);
+    if ($1 == NULL) {
+      error_incomplete();
+    } else {
+      TypeInfo* param_type = deep_copy_typeinfo($1);
+      param_type -> array_size = $5;
+      $$ = create_param_list();
+      add_param($$, $3, param_type);
+    }
   }
   ;
 
@@ -227,9 +254,9 @@ def_list
 
 def
   : type_specifier pointers ID ';' {
-    /* 타입 정보 생성 */
-    /* insert_symbol(이름, 타입)을 호출해 심볼 테이블에 추가 */
-    if (!insert_symbol($3, $1)) {
+    if ($1 == NULL) {
+      error_incomplete();
+    } else if (!insert_symbol($3, $1)) {
       error_redeclaration();
     }
   }
@@ -300,45 +327,84 @@ expr
   ;
 
 binary
-  : binary RELOP binary { /* 하나가 NULL이면 무조건 NULL을 반환해줘야 함 */
+  : binary RELOP binary {
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
+    } else if (!is_comparable_type($1, $3)) {
+      error_comparable();
+      $$ = NULL;
     } else {
-      /* 타입을 검사함 */
-      $$ = $1;
+      $$ = malloc(sizeof(TypeInfo));
+      $$->type = TYPE_INT;
+      $$->is_lvalue = 0;
+      $$->next = NULL;
+      $$->struct_name = NULL;
+      $$->array_size = 0;
     }
   }
-  | binary EQUOP binary 
+  | binary EQUOP binary {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else if (!is_comparable_type($1, $3)) {
+      error_comparable();
+      $$ = NULL;
+    } else {
+      $$ = malloc(sizeof(TypeInfo));
+      $$->type = TYPE_INT;
+      $$->is_lvalue = 0;
+      $$->next = NULL;
+      $$->struct_name = NULL;
+      $$->array_size = 0;
+    }
+  }
   | binary '+' binary {
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+      error_binary();
+      $$ = NULL;
     } else {
-      /* 타입을 검사함 */
-      $$ = $1;
+      $$ = deep_copy_typeinfo($1);
     }
   }
   | binary '-' binary  {
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+      error_binary();
+      $$ = NULL;
     } else {
-      /* 타입을 검사함 */
-      $$ = $1;
+      $$ = deep_copy_typeinfo($1);
     }
   }
   | binary '*' binary {
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+      error_binary();
+      $$ = NULL;
     } else {
-      /* 타입을 검사함 */
-      $$ = $1;
+      $$ = deep_copy_typeinfo($1);
     }
   }
   | binary '/' binary {
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+      error_binary();
+      $$ = NULL;
     } else {
-      /* 타입을 검사함 */
-      $$ = $1;
+      $$ = deep_copy_typeinfo($1);
+    }
+  }
+  | binary '%' binary {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+      error_binary();
+      $$ = NULL;
+    } else {
+      $$ = deep_copy_typeinfo($1);
     }
   }
   | unary %prec '=' {
@@ -347,9 +413,16 @@ binary
   | binary LOGICAL_AND binary  {
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
+    } else if (!is_boolean_type($1) || !is_boolean_type($3)) {
+      error_binary();
+      $$ = NULL;
     } else {
-      /* 타입을 검사함 */
-      $$ = $1;
+      $$ = malloc(sizeof(TypeInfo));
+      $$->type = TYPE_INT;
+      $$->is_lvalue = 0;
+      $$->next = NULL;
+      $$->struct_name = NULL;
+      $$->array_size = 0;
     }
   }
   | binary LOGICAL_OR binary {

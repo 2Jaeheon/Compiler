@@ -88,4 +88,8 @@ void register_struct_type(const char *name, FieldInfo *field_list);
 TypeInfo* find_field_type(TypeInfo *struct_type, const char *field_name);
 TypeInfo* deep_copy_typeinfo(TypeInfo* src);
 FieldInfo* deep_copy_field_list(FieldInfo* src);
+int is_arithmetic_type(TypeInfo* type);
+int is_boolean_type(TypeInfo* type);
+int is_comparable_type(TypeInfo* type1, TypeInfo* type2);
+
 #endif

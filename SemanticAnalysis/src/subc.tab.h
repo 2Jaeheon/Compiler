@@ -83,7 +83,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 33 "subc.y"
+#line 39 "subc.y"
 
   /* 토큰 타입 */
   int   intVal;

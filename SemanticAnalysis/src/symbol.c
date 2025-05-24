@@ -354,3 +354,23 @@ FieldInfo* deep_copy_field_list(FieldInfo* src) {
 
     return head;
 }
+
+// 연산자 함수
+int is_arithmetic_type(TypeInfo* type) {
+    return type->type == TYPE_INT || type->type == TYPE_CHAR;
+}
+
+int is_boolean_type(TypeInfo* type) {
+    return type->type == TYPE_INT;
+}
+
+int is_comparable_type(TypeInfo* type1, TypeInfo* type2) {
+    if (type1 == NULL || type2 == NULL) return 0;
+    if (type1->type == TYPE_STRUCT || type2->type == TYPE_STRUCT) return 0;
+    if ((type1->type == TYPE_INT || type1->type == TYPE_CHAR) &&
+        (type2->type == TYPE_INT || type2->type == TYPE_CHAR)) {
+        return 1;
+    }
+    return 0;
+}
+
