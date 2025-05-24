@@ -29,6 +29,7 @@ void error_indirection(void);
   char  *stringVal;
   /* type_specifier는 타입 정보를 담는 구조체 포인터(TypeInfo*)를 전달 */
   struct TypeInfo *typeInfo;
+  struct ParamList *paramList;
 }
 
 /* Precedences and Associativities */
@@ -62,7 +63,7 @@ void error_indirection(void);
 %type<typeInfo> binary
 %type<typeInfo> expr_e
 %type<typeInfo> func_decl
-
+%type<paramList> param_list param_decl
 
 /* Grammar rules */
 %%
@@ -89,7 +90,7 @@ ext_def
     }
   }
   | struct_specifier ';' 
-  | func_decl compound_stmt 
+  | func_decl compound_stmt
   ;
 
 type_specifier
@@ -134,8 +135,12 @@ struct_specifier
   ;
 
 func_decl
-  : type_specifier pointers ID '(' ')' 
-  | type_specifier pointers ID '(' param_list ')' 
+  : type_specifier pointers ID '(' ')' {
+    current_param_list = NULL;
+  }
+  | type_specifier pointers ID '(' param_list ')' {
+    current_param_list = $5;
+  }
   ;
 
 pointers
@@ -144,13 +149,28 @@ pointers
   ;
 
 param_list  
-  : param_decl 
-  | param_list ',' param_decl 
+  : param_decl {
+    $$ = $1;
+  }
+  | param_list ',' param_decl {
+    if ($1 != NULL && $3 != NULL) {
+      $1->tail->next = $3->head;
+      $1->tail = $3->tail;
+    }
+    $$ = $1;
+  }
   ;		
 
 param_decl 
-  : type_specifier pointers ID 
-  | type_specifier pointers ID '[' INTEGER_CONST ']' 
+  : type_specifier pointers ID {
+    $$ = create_param_list();
+    add_param($$, $3, $1); 
+  }
+  | type_specifier pointers ID '[' INTEGER_CONST ']' {
+    $1 -> array_size = $5;
+    $$ = create_param_list();
+    add_param($$, $3, $1);
+  }
   ;
 
 def_list    
@@ -177,6 +197,8 @@ def
 compound_stmt
   : '{' {
     push_scope();
+    insert_param_list_to_scope(current_param_list);
+    current_param_list = NULL;
   } def_list stmt_list '}' {
     pop_scope();
   }

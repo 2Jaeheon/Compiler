@@ -91,8 +91,9 @@ union YYSTYPE
   char  *stringVal;
   /* type_specifier는 타입 정보를 담는 구조체 포인터(TypeInfo*)를 전달 */
   struct TypeInfo *typeInfo;
+  struct ParamList *paramList;
 
-#line 96 "subc.tab.h"
+#line 97 "subc.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

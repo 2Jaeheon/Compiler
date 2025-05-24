@@ -33,7 +33,22 @@ typedef struct SymbolTable {
 } SymbolTable;
 
 // extern 키워드를 사용하여 외부에서 접근 가능하도록 선언
+
+
+// Parameter들 저장하는 구조체
+typedef struct ParamNode {
+    char* name;
+    TypeInfo* type;
+    struct ParamNode* next;
+} ParamNode;
+
+typedef struct ParamList {
+    ParamNode* head;
+    ParamNode* tail;
+} ParamList;
+
 extern SymbolTable *current_scope; //현재 스코프를 가리키는 포인터
+extern ParamList* current_param_list; // 현재 함수의 파라미터 리스트를 가리키는 포인터
 
 
 /* ========== 함수 선언 ========== */
@@ -48,5 +63,8 @@ int lookup_symbol_in_current_scope(const char* name);
 Symbol* lookup_symbol(const char *name);
 int is_same_type(TypeInfo* type1, TypeInfo* type2);
 int is_lvalue(TypeInfo *type);
-
+ParamList* create_param_list();
+void add_param(ParamList* list, const char* name, TypeInfo* type);
+void insert_param_list_to_scope(ParamList* list);
+void error_redeclaration(); 
 #endif

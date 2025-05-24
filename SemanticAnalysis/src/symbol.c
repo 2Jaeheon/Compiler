@@ -4,6 +4,7 @@
 #include "symbol.h"
 
 SymbolTable* current_scope = NULL;
+ParamList* current_param_list = NULL;
 
 // 새로운 스코프를 생성
 SymbolTable* create_symbol_table(SymbolTable* parent) {
@@ -167,4 +168,47 @@ int is_lvalue(TypeInfo *type) {
         return 0;
     }
     return type->is_lvalue;
+}
+
+// ParamList 초기화
+ParamList* create_param_list() {
+    // 파라미터 리스트 메모리 할당
+    ParamList* list = (ParamList*)malloc(sizeof(ParamList));
+    // 파라미터 리스트 초기화
+    list->head = list->tail = NULL;
+
+    return list;
+}
+
+// 파라미터 추가
+void add_param(ParamList* list, const char* name, TypeInfo* type) {
+    // 파라미터 노드 메모리 할당
+    ParamNode* node = (ParamNode*)malloc(sizeof(ParamNode));
+    node->name = strdup(name);
+    node->type = type;
+    node->next = NULL;
+
+    // 파라미터 리스트가 비어있지 않으면, 리스트의 tail 노드의 next 포인터를 현재 추가한 파라미터 노드로 업데이트
+    if(list->tail != NULL) {
+        // 파라미터 리스트의 tail 노드의 next 포인터를 현재 추가한 파라미터 노드로 업데이트
+        list->tail->next = node;
+    } else { // 파라미터 리스트가 비어있으면, 파라미터 리스트의 head 노드를 현재 추가한 파라미터 노드로 업데이트
+        list->head = node;
+    }
+    // 파라미터 리스트의 테일을 현재 추가한 파라미터 노드로 업데이트
+    list->tail = node;
+}
+
+void insert_param_list_to_scope(ParamList* list){
+    ParamNode* current_node = list->head;
+
+    // 파라미터 리스트의 모든 노드를 순회하면서 심볼 테이블에 추가
+    while(current_node != NULL) {
+        if(!insert_symbol(current_node->name, current_node->type)){
+            // 중복 선언 오류 발생 시, 에러 메시지 출력
+            printf("중복 선언 오류: %s\n", current_node->name);
+        }
+        // 다음 노드로 이동
+        current_node = current_node->next;
+    }
 }

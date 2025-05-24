@@ -169,10 +169,10 @@ Nonterminals, with rules where they appear
     pointers (48)
         on left: 14 15
         on right: 4 5 12 13 18 19 22 23
-    param_list (49)
+    param_list <paramList> (49)
         on left: 16 17
         on right: 13 17
-    param_decl (50)
+    param_decl <paramList> (50)
         on left: 18 19
         on right: 16 17
     def_list (51)
