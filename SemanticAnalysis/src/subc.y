@@ -629,13 +629,12 @@ unary
   | '*' unary %prec '!' {
     if ($2 == NULL) {
       $$ = NULL;
-    } else if($2 -> type != TYPE_POINTER) {
-      error_lineno = get_lineno();
+    } else if($2 -> type != TYPE_POINTER) { /* 만일 $2의 타입이 포인터가 아니라면, 에러 메시지를 출력함 */
       error_indirection();
       $$ = NULL;
     } else {
-      $$ = $2 -> next;
-      $$ -> is_lvalue = 1;
+      $$ = $2 -> next; /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 포인터의 값을 가지고 있는 타입을 반환함 */
+      $$ -> is_lvalue = 1;  /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 lvalue로 처리함 */
     }
   }
   | unary '[' expr ']' {

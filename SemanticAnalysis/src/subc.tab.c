@@ -582,8 +582,8 @@ static const yytype_int16 yyrline[] =
      377,   378,   385,   386,   387,   388,   389,   390,   391,   392,
      396,   397,   403,   421,   427,   442,   457,   467,   477,   487,
      497,   507,   510,   525,   537,   540,   543,   551,   559,   573,
-     584,   591,   598,   599,   600,   607,   614,   629,   641,   655,
-     675,   694,   695,   696,   707,   708
+     584,   591,   598,   599,   600,   607,   614,   629,   640,   654,
+     672,   691,   692,   693,   704,   705
 };
 #endif
 
@@ -1941,20 +1941,19 @@ yyreduce:
                         {
     if ((yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
-    } else if((yyvsp[0].typeInfo) -> type != TYPE_POINTER) {
-      error_lineno = get_lineno();
+    } else if((yyvsp[0].typeInfo) -> type != TYPE_POINTER) { /* 만일 $2의 타입이 포인터가 아니라면, 에러 메시지를 출력함 */
       error_indirection();
       (yyval.typeInfo) = NULL;
     } else {
-      (yyval.typeInfo) = (yyvsp[0].typeInfo) -> next;
-      (yyval.typeInfo) -> is_lvalue = 1;
+      (yyval.typeInfo) = (yyvsp[0].typeInfo) -> next; /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 포인터의 값을 가지고 있는 타입을 반환함 */
+      (yyval.typeInfo) -> is_lvalue = 1;  /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 lvalue로 처리함 */
     }
   }
-#line 1954 "subc.tab.c"
+#line 1953 "subc.tab.c"
     break;
 
   case 68: /* unary: unary '[' expr ']'  */
-#line 641 "subc.y"
+#line 640 "subc.y"
                        {
     if ((yyvsp[-3].typeInfo) == NULL || (yyvsp[-1].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1969,23 +1968,21 @@ yyreduce:
       (yyval.typeInfo)->is_lvalue = 1;
     }
   }
-#line 1973 "subc.tab.c"
+#line 1972 "subc.tab.c"
     break;
 
   case 69: /* unary: unary '.' ID  */
-#line 655 "subc.y"
+#line 654 "subc.y"
                  {
-    if ((yyvsp[-2].typeInfo) == NULL) {
+    if((yyvsp[-2].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
     } else if((yyvsp[-2].typeInfo)->type != TYPE_STRUCT) {
-      error_lineno = get_lineno(); // 여기에서 라인번호 기록
       error_incompatible(); 
       (yyval.typeInfo) = NULL;
     } else {
       TypeInfo *field_type = find_field_type((yyvsp[-2].typeInfo), (yyvsp[0].stringVal));
 
       if(field_type == NULL) {
-        error_lineno = get_lineno(); // 필드 없을 때도 마찬가지
         error_member();
         (yyval.typeInfo) = NULL;
       } else {
@@ -1994,11 +1991,11 @@ yyreduce:
       }
     }
   }
-#line 1998 "subc.tab.c"
+#line 1995 "subc.tab.c"
     break;
 
   case 70: /* unary: unary STRUCTOP ID  */
-#line 675 "subc.y"
+#line 672 "subc.y"
                       {
     if((yyvsp[-2].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -2018,11 +2015,11 @@ yyreduce:
       }
     }
   }
-#line 2022 "subc.tab.c"
+#line 2019 "subc.tab.c"
     break;
 
   case 73: /* unary: SYM_NULL  */
-#line 696 "subc.y"
+#line 693 "subc.y"
              {
     (yyval.typeInfo) = malloc(sizeof(TypeInfo));
     (yyval.typeInfo)->type = TYPE_NULLPTR;
@@ -2031,11 +2028,11 @@ yyreduce:
     (yyval.typeInfo)->struct_name = NULL;
     (yyval.typeInfo)->array_size = 0;
   }
-#line 2035 "subc.tab.c"
+#line 2032 "subc.tab.c"
     break;
 
 
-#line 2039 "subc.tab.c"
+#line 2036 "subc.tab.c"
 
       default: break;
     }
@@ -2228,7 +2225,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 711 "subc.y"
+#line 708 "subc.y"
 
 
 /* Epilogue section */
