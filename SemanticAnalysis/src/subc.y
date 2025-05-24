@@ -215,6 +215,8 @@ func_decl
       final_type = $2;
     }
 
+    current_function_return_type = final_type;
+
     if(!insert_symbol($3, final_type)) {
       error_redeclaration();
 
@@ -233,6 +235,8 @@ func_decl
       $2->next = $1;
       final_type = $2;
     }
+
+    current_function_return_type = final_type;
 
     current_param_list = $5;
 
@@ -370,7 +374,13 @@ stmt_list
 
 stmt
   : expr ';' 
-  | RETURN expr ';' 
+  | RETURN expr ';' {
+    if ($2 != NULL && current_function_return_type != NULL) {
+        if (!is_same_type($2, current_function_return_type)) {
+            error_return();
+        }
+    }
+  }
   | BREAK ';' 
   | CONTINUE ';' 
   | ';' 

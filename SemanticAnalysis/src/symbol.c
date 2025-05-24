@@ -7,6 +7,7 @@ SymbolTable* current_scope = NULL;
 ParamList* current_param_list = NULL;
 StructType* global_type_list = NULL;
 FuncInfo* global_func_list = NULL;
+TypeInfo* current_function_return_type = NULL;
 
 // 새로운 스코프를 생성
 SymbolTable* create_symbol_table(SymbolTable* parent) {
