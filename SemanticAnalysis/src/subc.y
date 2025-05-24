@@ -136,10 +136,22 @@ struct_specifier
 
 func_decl
   : type_specifier pointers ID '(' ')' {
-    current_param_list = NULL;
+    if (!insert_symbol($3, $1)) {
+        error_redeclaration();
+        current_param_list = NULL; 
+        $$ = NULL; 
+    } else {
+        $$ = NULL;
+    }
   }
   | type_specifier pointers ID '(' param_list ')' {
-    current_param_list = $5;
+    if (!insert_symbol($3, $1)) {
+        error_redeclaration();
+        current_param_list = NULL; 
+        $$ = NULL;
+    } else {
+         current_param_list = $5;
+    }
   }
   ;
 
@@ -197,8 +209,10 @@ def
 compound_stmt
   : '{' {
     push_scope();
-    insert_param_list_to_scope(current_param_list);
-    current_param_list = NULL;
+    if (current_param_list != NULL) {
+      insert_param_list_to_scope(current_param_list);
+      current_param_list = NULL;
+    }
   } def_list stmt_list '}' {
     pop_scope();
   }
