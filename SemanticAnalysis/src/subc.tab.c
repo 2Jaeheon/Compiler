@@ -82,8 +82,16 @@ void error_undeclared(void);
 void error_incompatible(void);
 void error_assignable(void);
 void error_indirection(void);
+void error_struct(void);
+void error_strurctp(void);
+void error_member(void);
+void error_array(void);
+void error_subscript(void);
+void error_incomplete(void);
+void error_return(void);
 
-#line 87 "subc.tab.c"
+
+#line 95 "subc.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -561,14 +569,14 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    71,    71,    75,    76,    80,    86,    92,    93,    97,
-     115,   119,   119,   141,   154,   163,   175,   176,   180,   183,
-     193,   197,   205,   206,   210,   217,   226,   226,   238,   239,
-     243,   244,   245,   246,   247,   248,   249,   250,   251,   252,
-     256,   257,   263,   278,   284,   292,   293,   301,   309,   317,
-     325,   328,   336,   348,   351,   354,   362,   370,   378,   389,
-     396,   403,   404,   405,   412,   419,   426,   437,   438,   439,
-     440,   441,   442,   448,   449
+       0,    79,    79,    83,    84,    88,    94,   100,   101,   105,
+     123,   127,   127,   148,   172,   181,   193,   194,   198,   201,
+     211,   215,   223,   224,   228,   235,   244,   244,   256,   257,
+     261,   262,   263,   264,   265,   266,   267,   268,   269,   270,
+     274,   275,   281,   296,   302,   310,   311,   319,   327,   335,
+     343,   346,   354,   366,   369,   372,   380,   388,   396,   410,
+     417,   424,   425,   426,   433,   440,   447,   458,   459,   478,
+     498,   499,   500,   506,   507
 };
 #endif
 
@@ -1235,29 +1243,29 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* ext_def: type_specifier pointers ID ';'  */
-#line 80 "subc.y"
+#line 88 "subc.y"
                                    { 
     /* 타입 정보 생성 */
     if (!insert_symbol((yyvsp[-1].stringVal), (yyvsp[-3].typeInfo))) {
       error_redeclaration();
     }
   }
-#line 1246 "subc.tab.c"
+#line 1254 "subc.tab.c"
     break;
 
   case 6: /* ext_def: type_specifier pointers ID '[' INTEGER_CONST ']' ';'  */
-#line 86 "subc.y"
+#line 94 "subc.y"
                                                          {
     /* 타입 정보 생성 */
     if (!insert_symbol((yyvsp[-4].stringVal), (yyvsp[-6].typeInfo))) {
       error_redeclaration();
     }
   }
-#line 1257 "subc.tab.c"
+#line 1265 "subc.tab.c"
     break;
 
   case 9: /* type_specifier: TYPE  */
-#line 97 "subc.y"
+#line 105 "subc.y"
          {
     /* 타입 정보 생성 */
     /* 만약 int 또는 char가 들어오면 해당 타입을 나타내는 TypeInfo를 생성해 반환 */
@@ -1276,19 +1284,19 @@ yyreduce:
     (yyval.typeInfo)->array_size = 0;
     (yyval.typeInfo)->is_lvalue = 0;
   }
-#line 1280 "subc.tab.c"
-    break;
-
-  case 11: /* $@1: %empty  */
-#line 119 "subc.y"
-                  {
-    push_scope();
-  }
 #line 1288 "subc.tab.c"
     break;
 
+  case 11: /* $@1: %empty  */
+#line 127 "subc.y"
+                  {
+    push_scope();
+  }
+#line 1296 "subc.tab.c"
+    break;
+
   case 12: /* struct_specifier: STRUCT ID '{' $@1 def_list '}'  */
-#line 121 "subc.y"
+#line 129 "subc.y"
                  {
     if(is_redelcare_struct((yyvsp[-4].stringVal))) {
       error_redeclaration();
@@ -1302,18 +1310,17 @@ yyreduce:
       (yyval.typeInfo)->is_lvalue = 0;
       /* 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환 */
       (yyval.typeInfo)->field_list = convert_scope_to_filed_list();
-
       /* 전역 구조체 리스트에 추가(구조체 이름을 키로 사용하여 구조체 정보를 저장) */
       register_struct_type((yyvsp[-4].stringVal), (yyval.typeInfo)->field_list);
     }
     /* 스코프 종료 */
     pop_scope();
   }
-#line 1313 "subc.tab.c"
+#line 1320 "subc.tab.c"
     break;
 
   case 13: /* struct_specifier: STRUCT ID  */
-#line 141 "subc.y"
+#line 148 "subc.y"
               {
     /* 단순한 구조체 선언( struct S; 와 같은 경우) */
     (yyval.typeInfo) = malloc(sizeof(TypeInfo));
@@ -1322,13 +1329,24 @@ yyreduce:
     (yyval.typeInfo)->next = NULL;
     (yyval.typeInfo)->array_size = 0;
     (yyval.typeInfo)->is_lvalue = 0;
+    
+    StructType *current = global_type_list;
     (yyval.typeInfo)->field_list = NULL;
+
+    while(current != NULL) {
+      if(strcmp(current->name, (yyvsp[0].stringVal)) == 0) {
+        (yyval.typeInfo)->field_list = current->field_list;
+        break;
+      }
+      current = current->next;
+    }
+    
   }
-#line 1328 "subc.tab.c"
+#line 1346 "subc.tab.c"
     break;
 
   case 14: /* func_decl: type_specifier pointers ID '(' ')'  */
-#line 154 "subc.y"
+#line 172 "subc.y"
                                        {
     if (!insert_symbol((yyvsp[-2].stringVal), (yyvsp[-4].typeInfo))) {
         error_redeclaration();
@@ -1338,11 +1356,11 @@ yyreduce:
         (yyval.typeInfo) = NULL;
     }
   }
-#line 1342 "subc.tab.c"
+#line 1360 "subc.tab.c"
     break;
 
   case 15: /* func_decl: type_specifier pointers ID '(' param_list ')'  */
-#line 163 "subc.y"
+#line 181 "subc.y"
                                                   {
     if (!insert_symbol((yyvsp[-3].stringVal), (yyvsp[-5].typeInfo))) {
         error_redeclaration();
@@ -1352,19 +1370,19 @@ yyreduce:
          current_param_list = (yyvsp[-1].paramList);
     }
   }
-#line 1356 "subc.tab.c"
+#line 1374 "subc.tab.c"
     break;
 
   case 18: /* param_list: param_decl  */
-#line 180 "subc.y"
+#line 198 "subc.y"
                {
     (yyval.paramList) = (yyvsp[0].paramList);
   }
-#line 1364 "subc.tab.c"
+#line 1382 "subc.tab.c"
     break;
 
   case 19: /* param_list: param_list ',' param_decl  */
-#line 183 "subc.y"
+#line 201 "subc.y"
                               {
     if ((yyvsp[-2].paramList) != NULL && (yyvsp[0].paramList) != NULL) {
       (yyvsp[-2].paramList)->tail->next = (yyvsp[0].paramList)->head;
@@ -1372,30 +1390,30 @@ yyreduce:
     }
     (yyval.paramList) = (yyvsp[-2].paramList);
   }
-#line 1376 "subc.tab.c"
+#line 1394 "subc.tab.c"
     break;
 
   case 20: /* param_decl: type_specifier pointers ID  */
-#line 193 "subc.y"
+#line 211 "subc.y"
                                {
     (yyval.paramList) = create_param_list();
     add_param((yyval.paramList), (yyvsp[0].stringVal), (yyvsp[-2].typeInfo)); 
   }
-#line 1385 "subc.tab.c"
+#line 1403 "subc.tab.c"
     break;
 
   case 21: /* param_decl: type_specifier pointers ID '[' INTEGER_CONST ']'  */
-#line 197 "subc.y"
+#line 215 "subc.y"
                                                      {
     (yyvsp[-5].typeInfo) -> array_size = (yyvsp[-1].intVal);
     (yyval.paramList) = create_param_list();
     add_param((yyval.paramList), (yyvsp[-3].stringVal), (yyvsp[-5].typeInfo));
   }
-#line 1395 "subc.tab.c"
+#line 1413 "subc.tab.c"
     break;
 
   case 24: /* def: type_specifier pointers ID ';'  */
-#line 210 "subc.y"
+#line 228 "subc.y"
                                    {
     /* 타입 정보 생성 */
     /* insert_symbol(이름, 타입)을 호출해 심볼 테이블에 추가 */
@@ -1403,22 +1421,22 @@ yyreduce:
       error_redeclaration();
     }
   }
-#line 1407 "subc.tab.c"
+#line 1425 "subc.tab.c"
     break;
 
   case 25: /* def: type_specifier pointers ID '[' INTEGER_CONST ']' ';'  */
-#line 217 "subc.y"
+#line 235 "subc.y"
                                                          {
     /* 타입 정보 생성 */
     if (!insert_symbol((yyvsp[-4].stringVal), (yyvsp[-6].typeInfo))) {
       error_redeclaration();
     }
   }
-#line 1418 "subc.tab.c"
+#line 1436 "subc.tab.c"
     break;
 
   case 26: /* $@2: %empty  */
-#line 226 "subc.y"
+#line 244 "subc.y"
         {
     push_scope();
     if (current_param_list != NULL) {
@@ -1426,27 +1444,27 @@ yyreduce:
       current_param_list = NULL;
     }
   }
-#line 1430 "subc.tab.c"
+#line 1448 "subc.tab.c"
     break;
 
   case 27: /* compound_stmt: '{' $@2 def_list stmt_list '}'  */
-#line 232 "subc.y"
+#line 250 "subc.y"
                            {
     pop_scope();
   }
-#line 1438 "subc.tab.c"
+#line 1456 "subc.tab.c"
     break;
 
   case 41: /* expr_e: %empty  */
-#line 257 "subc.y"
+#line 275 "subc.y"
            {
     (yyval.typeInfo) = NULL;
   }
-#line 1446 "subc.tab.c"
+#line 1464 "subc.tab.c"
     break;
 
   case 42: /* expr: unary '=' expr  */
-#line 263 "subc.y"
+#line 281 "subc.y"
                    { /* 대입문을 분석할 때, 왼쪽과 오른쪽의 타입 검사 및 할당 가능한지를 체크하는 부분
   만약 a가 선언되지 않았는데, lookup_symbol()을 통해 타입을 찾으려고 하면, 에러가 발생함.
   따라서 이를 통해서 둘 중 하나라도 문제가 있는 경우에는 NULL을 반환하게 한다. */
@@ -1462,19 +1480,19 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1466 "subc.tab.c"
+#line 1484 "subc.tab.c"
     break;
 
   case 43: /* expr: binary  */
-#line 278 "subc.y"
+#line 296 "subc.y"
            {
     (yyval.typeInfo) = (yyvsp[0].typeInfo); /* binary의 결과를 그대로 넘김 */
   }
-#line 1474 "subc.tab.c"
+#line 1492 "subc.tab.c"
     break;
 
   case 44: /* binary: binary RELOP binary  */
-#line 284 "subc.y"
+#line 302 "subc.y"
                         { /* 하나가 NULL이면 무조건 NULL을 반환해줘야 함 */
     if ((yyvsp[-2].typeInfo) == NULL || (yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1483,11 +1501,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1487 "subc.tab.c"
+#line 1505 "subc.tab.c"
     break;
 
   case 46: /* binary: binary '+' binary  */
-#line 293 "subc.y"
+#line 311 "subc.y"
                       {
     if ((yyvsp[-2].typeInfo) == NULL || (yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1496,11 +1514,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1500 "subc.tab.c"
+#line 1518 "subc.tab.c"
     break;
 
   case 47: /* binary: binary '-' binary  */
-#line 301 "subc.y"
+#line 319 "subc.y"
                        {
     if ((yyvsp[-2].typeInfo) == NULL || (yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1509,11 +1527,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1513 "subc.tab.c"
+#line 1531 "subc.tab.c"
     break;
 
   case 48: /* binary: binary '*' binary  */
-#line 309 "subc.y"
+#line 327 "subc.y"
                       {
     if ((yyvsp[-2].typeInfo) == NULL || (yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1522,11 +1540,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1526 "subc.tab.c"
+#line 1544 "subc.tab.c"
     break;
 
   case 49: /* binary: binary '/' binary  */
-#line 317 "subc.y"
+#line 335 "subc.y"
                       {
     if ((yyvsp[-2].typeInfo) == NULL || (yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1535,19 +1553,19 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1539 "subc.tab.c"
+#line 1557 "subc.tab.c"
     break;
 
   case 50: /* binary: unary  */
-#line 325 "subc.y"
+#line 343 "subc.y"
                     {
     (yyval.typeInfo) = (yyvsp[0].typeInfo);
   }
-#line 1547 "subc.tab.c"
+#line 1565 "subc.tab.c"
     break;
 
   case 51: /* binary: binary LOGICAL_AND binary  */
-#line 328 "subc.y"
+#line 346 "subc.y"
                                {
     if ((yyvsp[-2].typeInfo) == NULL || (yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1556,11 +1574,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1560 "subc.tab.c"
+#line 1578 "subc.tab.c"
     break;
 
   case 52: /* binary: binary LOGICAL_OR binary  */
-#line 336 "subc.y"
+#line 354 "subc.y"
                              {
     if ((yyvsp[-2].typeInfo) == NULL || (yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1569,27 +1587,27 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[-2].typeInfo);
     }
   }
-#line 1573 "subc.tab.c"
+#line 1591 "subc.tab.c"
     break;
 
   case 53: /* unary: '(' expr ')'  */
-#line 348 "subc.y"
+#line 366 "subc.y"
                  {
     (yyval.typeInfo) = (yyvsp[-1].typeInfo);
   }
-#line 1581 "subc.tab.c"
+#line 1599 "subc.tab.c"
     break;
 
   case 54: /* unary: '(' unary ')'  */
-#line 351 "subc.y"
+#line 369 "subc.y"
                   {
     (yyval.typeInfo) = (yyvsp[-1].typeInfo);
   }
-#line 1589 "subc.tab.c"
+#line 1607 "subc.tab.c"
     break;
 
   case 55: /* unary: INTEGER_CONST  */
-#line 354 "subc.y"
+#line 372 "subc.y"
                   {
     (yyval.typeInfo) = malloc(sizeof(TypeInfo));
     (yyval.typeInfo)->type = TYPE_INT;
@@ -1598,11 +1616,11 @@ yyreduce:
     (yyval.typeInfo)->struct_name = NULL;
     (yyval.typeInfo)->array_size = 0;
   }
-#line 1602 "subc.tab.c"
+#line 1620 "subc.tab.c"
     break;
 
   case 56: /* unary: CHAR_CONST  */
-#line 362 "subc.y"
+#line 380 "subc.y"
                {
     (yyval.typeInfo) = malloc(sizeof(TypeInfo));
     (yyval.typeInfo)->type = TYPE_CHAR;
@@ -1611,11 +1629,11 @@ yyreduce:
     (yyval.typeInfo)->struct_name = NULL;
     (yyval.typeInfo)->array_size = 0;
   }
-#line 1615 "subc.tab.c"
+#line 1633 "subc.tab.c"
     break;
 
   case 57: /* unary: STRING  */
-#line 370 "subc.y"
+#line 388 "subc.y"
            {
     (yyval.typeInfo) = malloc(sizeof(TypeInfo));
     (yyval.typeInfo)->type = TYPE_INT;
@@ -1624,11 +1642,11 @@ yyreduce:
     (yyval.typeInfo)->struct_name = NULL;
     (yyval.typeInfo)->array_size = 0;
   }
-#line 1628 "subc.tab.c"
+#line 1646 "subc.tab.c"
     break;
 
   case 58: /* unary: ID  */
-#line 378 "subc.y"
+#line 396 "subc.y"
        {
     /* ID를 사용할 때, 이전에 선언된 적이 있는 지 확인해야함. */
     Symbol *symbol = lookup_symbol((yyvsp[0].stringVal));
@@ -1638,13 +1656,16 @@ yyreduce:
     } else { 
       (yyval.typeInfo) = symbol -> type;
       (yyval.typeInfo) -> is_lvalue = 1;
+
+      printf("ID %s 타입: %d, 구조체 이름: %s\n", (yyvsp[0].stringVal), (yyval.typeInfo)->type, (yyval.typeInfo)->struct_name ? (yyval.typeInfo)->struct_name : "NULL");
+
     }
   }
-#line 1644 "subc.tab.c"
+#line 1665 "subc.tab.c"
     break;
 
   case 59: /* unary: '-' unary  */
-#line 389 "subc.y"
+#line 410 "subc.y"
                         {
     if ((yyvsp[0].typeInfo) == NULL){
       (yyval.typeInfo) = NULL;
@@ -1652,11 +1673,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[0].typeInfo);
     }
   }
-#line 1656 "subc.tab.c"
+#line 1677 "subc.tab.c"
     break;
 
   case 60: /* unary: '!' unary  */
-#line 396 "subc.y"
+#line 417 "subc.y"
               {
     if ((yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1664,11 +1685,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[0].typeInfo);
     }
   }
-#line 1668 "subc.tab.c"
+#line 1689 "subc.tab.c"
     break;
 
   case 63: /* unary: INCOP unary  */
-#line 405 "subc.y"
+#line 426 "subc.y"
                           {
     if ((yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1676,11 +1697,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[0].typeInfo);
     }
   }
-#line 1680 "subc.tab.c"
+#line 1701 "subc.tab.c"
     break;
 
   case 64: /* unary: DECOP unary  */
-#line 412 "subc.y"
+#line 433 "subc.y"
                           {
     if ((yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1688,11 +1709,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[0].typeInfo);
     }
   }
-#line 1692 "subc.tab.c"
+#line 1713 "subc.tab.c"
     break;
 
   case 65: /* unary: '&' unary  */
-#line 419 "subc.y"
+#line 440 "subc.y"
               {
     if ((yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1700,11 +1721,11 @@ yyreduce:
       (yyval.typeInfo) = (yyvsp[0].typeInfo);
     }
   }
-#line 1704 "subc.tab.c"
+#line 1725 "subc.tab.c"
     break;
 
   case 66: /* unary: '*' unary  */
-#line 426 "subc.y"
+#line 447 "subc.y"
                         {
     if ((yyvsp[0].typeInfo) == NULL) {
       (yyval.typeInfo) = NULL;
@@ -1716,19 +1737,68 @@ yyreduce:
       (yyval.typeInfo) -> is_lvalue = 1;  /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 lvalue로 처리함 */
     }
   }
-#line 1720 "subc.tab.c"
+#line 1741 "subc.tab.c"
+    break;
+
+  case 68: /* unary: unary '.' ID  */
+#line 459 "subc.y"
+                 {
+    if((yyvsp[-2].typeInfo) == NULL) {
+      (yyval.typeInfo) = NULL;
+    } else if((yyvsp[-2].typeInfo)->type != TYPE_STRUCT) {
+      error_struct();
+      (yyval.typeInfo) = NULL;
+    } else {
+      TypeInfo *field_type = find_field_type((yyvsp[-2].typeInfo), (yyvsp[0].stringVal));
+
+      if(field_type == NULL) {
+        error_member();
+        (yyval.typeInfo) = NULL;
+      } else {
+        (yyval.typeInfo) = malloc(sizeof(TypeInfo));
+        memcpy((yyval.typeInfo), field_type, sizeof(TypeInfo));
+        (yyval.typeInfo)->is_lvalue = 1;
+      }
+    }
+  }
+#line 1765 "subc.tab.c"
+    break;
+
+  case 69: /* unary: unary STRUCTOP ID  */
+#line 478 "subc.y"
+                      {
+    if((yyvsp[-2].typeInfo) == NULL) {
+      (yyval.typeInfo) = NULL;
+    } else if((yyvsp[-2].typeInfo)->type != TYPE_POINTER || (yyvsp[-2].typeInfo)->next->type != TYPE_STRUCT) {
+      error_strurctp(); /* 구조체 포인터가 아니라면 에러 메시지를 출력함 */
+      (yyval.typeInfo) = NULL;
+    } else {
+      TypeInfo *struct_type = (yyvsp[-2].typeInfo)->next;
+      TypeInfo *field_type = find_field_type(struct_type, (yyvsp[0].stringVal));
+
+      if(field_type == NULL) {
+        error_member();
+        (yyval.typeInfo) = NULL;
+      } else {
+        (yyval.typeInfo) = malloc(sizeof(TypeInfo));
+        memcpy((yyval.typeInfo), field_type, sizeof(TypeInfo));
+        (yyval.typeInfo)->is_lvalue = 1;
+      }
+    }
+  }
+#line 1790 "subc.tab.c"
     break;
 
   case 72: /* unary: SYM_NULL  */
-#line 442 "subc.y"
+#line 500 "subc.y"
              {
     (yyval.typeInfo) = NULL;
   }
-#line 1728 "subc.tab.c"
+#line 1798 "subc.tab.c"
     break;
 
 
-#line 1732 "subc.tab.c"
+#line 1802 "subc.tab.c"
 
       default: break;
     }
@@ -1921,7 +1991,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 452 "subc.y"
+#line 510 "subc.y"
 
 
 /* Epilogue section */

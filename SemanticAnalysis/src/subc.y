@@ -17,6 +17,14 @@ void error_undeclared(void);
 void error_incompatible(void);
 void error_assignable(void);
 void error_indirection(void);
+void error_struct(void);
+void error_strurctp(void);
+void error_member(void);
+void error_array(void);
+void error_subscript(void);
+void error_incomplete(void);
+void error_return(void);
+
 %}
 
 /* Bison declarations section */
@@ -131,7 +139,6 @@ struct_specifier
       $$->is_lvalue = 0;
       /* 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환 */
       $$->field_list = convert_scope_to_filed_list();
-
       /* 전역 구조체 리스트에 추가(구조체 이름을 키로 사용하여 구조체 정보를 저장) */
       register_struct_type($2, $$->field_list);
     }
@@ -146,7 +153,18 @@ struct_specifier
     $$->next = NULL;
     $$->array_size = 0;
     $$->is_lvalue = 0;
+    
+    StructType *current = global_type_list;
     $$->field_list = NULL;
+
+    while(current != NULL) {
+      if(strcmp(current->name, $2) == 0) {
+        $$->field_list = current->field_list;
+        break;
+      }
+      current = current->next;
+    }
+    
   }
   ;
 
@@ -384,6 +402,9 @@ unary
     } else { 
       $$ = symbol -> type;
       $$ -> is_lvalue = 1;
+
+      printf("ID %s 타입: %d, 구조체 이름: %s\n", $1, $$->type, $$->struct_name ? $$->struct_name : "NULL");
+
     }
   }
   | '-' unary %prec '!' {
@@ -435,8 +456,45 @@ unary
     }
   }
   | unary '[' expr ']' 
-  | unary '.' ID 
-  | unary STRUCTOP ID 
+  | unary '.' ID {
+    if($1 == NULL) {
+      $$ = NULL;
+    } else if($1->type != TYPE_STRUCT) {
+      error_struct();
+      $$ = NULL;
+    } else {
+      TypeInfo *field_type = find_field_type($1, $3);
+
+      if(field_type == NULL) {
+        error_member();
+        $$ = NULL;
+      } else {
+        $$ = malloc(sizeof(TypeInfo));
+        memcpy($$, field_type, sizeof(TypeInfo));
+        $$->is_lvalue = 1;
+      }
+    }
+  }
+  | unary STRUCTOP ID {
+    if($1 == NULL) {
+      $$ = NULL;
+    } else if($1->type != TYPE_POINTER || $1->next->type != TYPE_STRUCT) {
+      error_strurctp(); /* 구조체 포인터가 아니라면 에러 메시지를 출력함 */
+      $$ = NULL;
+    } else {
+      TypeInfo *struct_type = $1->next;
+      TypeInfo *field_type = find_field_type(struct_type, $3);
+
+      if(field_type == NULL) {
+        error_member();
+        $$ = NULL;
+      } else {
+        $$ = malloc(sizeof(TypeInfo));
+        memcpy($$, field_type, sizeof(TypeInfo));
+        $$->is_lvalue = 1;
+      }
+    }
+  }
   | unary '(' args ')' 
   | unary '(' ')' 
   | SYM_NULL {

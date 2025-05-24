@@ -126,16 +126,19 @@ Symbol* lookup_symbol(const char *name){
 int is_same_type(TypeInfo *type1, TypeInfo *type2) {
     // 둘 다 NULL이면 동일한 것
     if (type1 == NULL && type2 == NULL) {
+        printf("타입 비교 실패: 둘 다 NULL\n");
         return 1;
     }
 
     // 한 쪽만 NULL이면 다른 타입
     if (type1 == NULL || type2 == NULL) {
+        printf("타입 비교 실패: 한 쪽만 NULL\n");
         return 0;
     }
 
     // 타입의 종류가 다르면, 다른 타입
     if (type1->type != type2->type) {
+        printf("타입 비교 실패: 타입 종류가 다름\n");
         return 0;
     }
 
@@ -143,10 +146,12 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
     if (type1->type == TYPE_STRUCT) {
         // 구조체 이름이 없으면, 다른 타입
         if (type1->struct_name == NULL || type2->struct_name == NULL) {
+            printf("타입 비교 실패: 구조체 이름이 없음\n");
             return 0;
         }
         // 구조체 이름이 다르면, 다른 타입
         if (strcmp(type1->struct_name, type2->struct_name) != 0) {
+            printf("타입 비교 실패: 구조체 이름이 다름\n");
             return 0;
         }
     }
@@ -154,8 +159,13 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
     // 배열 타입의 경우에는 배열의 사이즈를 비교해줘야 함.
     if (type1->type == TYPE_ARRAY) {
         if (type1->array_size != type2->array_size) {
+            printf("타입 비교 실패: 배열 사이즈가 다름\n");
             return 0;
         }
+    }
+
+    if (type1->next == NULL && type2->next == NULL) {
+        return 1;
     }
 
     // 다음 타입 비교 (재귀 호출)
@@ -267,4 +277,36 @@ void register_struct_type(const char *name, FieldInfo *field_list) {
     new_struct->field_list = field_list;
     new_struct->next = global_type_list;
     global_type_list = new_struct;
+}
+
+// 구조체 멤버 탐색 함수 추가
+// 예를 들어서 a.b 이럴 때 탐색해야함
+TypeInfo* find_field_type(TypeInfo *struct_type, const char *field_name) {
+    if (!struct_type) {
+        printf("구조체 타입이 아닙니다.\n");
+        return NULL;
+    }
+    
+    if (struct_type->type != TYPE_STRUCT) {
+        printf("구조체 타입이 아닙니다.\n");
+        return NULL;
+    }
+    
+    if (!struct_type->field_list) {
+        printf("필드 리스트가 없습니다.\n");
+        return NULL;
+    }
+
+    FieldInfo *field = struct_type->field_list;
+
+    while(field != NULL) {
+        printf(" 필드 탐색 중: %s\n", field->name);
+        if (strcmp(field->name, field_name) == 0) {
+            printf("필드 일치: %s\n", field->name);
+            return field->type;
+        }
+        field = field->next;
+    }
+    printf("필드를 찾을 수 없습니다: %s\n", field_name);
+    return NULL;
 }

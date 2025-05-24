@@ -85,4 +85,5 @@ void error_redeclaration();
 FieldInfo* convert_scope_to_filed_list();
 int is_redelcare_struct(const char *name);
 void register_struct_type(const char *name, FieldInfo *field_list);
+TypeInfo* find_field_type(TypeInfo *struct_type, const char *field_name);
 #endif
