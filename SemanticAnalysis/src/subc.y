@@ -29,9 +29,9 @@ void error_binary(void);
 void error_unary(void);
 void error_arguments(void);
 void error_function(void);
-void error_arguments(void);
 void error_null(void);
 void error_addressof(void);
+
 %}
 
 /* Bison declarations section */
@@ -151,8 +151,10 @@ type_specifier
   ;
 
 struct_specifier
-  : STRUCT ID '{' {
+  : STRUCT ID {
     error_lineno = get_lineno();
+  }
+  '{' {
     push_scope();
   } def_list '}' {
     if(is_redelcare_struct($2)) {
@@ -175,18 +177,16 @@ struct_specifier
   }
   | STRUCT ID {
     /* 단순한 구조체 선언( struct S; 와 같은 경우) */
-    $$ = malloc(sizeof(TypeInfo));
-    $$->type = TYPE_STRUCT;
-    $$->struct_name = $2;
-    $$->next = NULL;
-    $$->array_size = 0;
-    $$->is_lvalue = 0;
-    
     StructType *current = global_type_list;
-    $$->field_list = NULL;
-
+    
     while(current != NULL) {
       if(strcmp(current->name, $2) == 0) {
+        $$ = malloc(sizeof(TypeInfo));
+        $$->type = TYPE_STRUCT;
+        $$->struct_name = $2;
+        $$->next = NULL;
+        $$->array_size = 0;
+        $$->is_lvalue = 0;
         $$->field_list = current->field_list;
         break;
       }
@@ -196,14 +196,6 @@ struct_specifier
     if (current == NULL) {
       error_undeclared();
       $$ = NULL;
-    } else {
-      $$ = malloc(sizeof(TypeInfo));
-      $$->type = TYPE_STRUCT;
-      $$->struct_name = $2;
-      $$->next = NULL;
-      $$->array_size = 0;
-      $$->is_lvalue = 0;
-      $$->field_list = current->field_list;
     }
   }
   ;
