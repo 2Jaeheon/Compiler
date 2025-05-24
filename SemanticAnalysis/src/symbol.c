@@ -5,6 +5,7 @@
 
 SymbolTable* current_scope = NULL;
 ParamList* current_param_list = NULL;
+StructType* global_type_list = NULL;
 
 // 새로운 스코프를 생성
 SymbolTable* create_symbol_table(SymbolTable* parent) {
@@ -244,4 +245,26 @@ FieldInfo* convert_scope_to_filed_list() {
 
     // 변환된 필드 리스트 반환
     return head;
+}
+
+// 구조체 중복을 확인
+int is_redelcare_struct(const char *name) {
+    StructType *current = global_type_list;
+
+    while(current != NULL) {
+        if (strcmp(current->name, name) == 0) {
+            return 1;
+        }
+        current = current->next;
+    }
+    return 0;
+}
+
+void register_struct_type(const char *name, FieldInfo *field_list) {
+    StructType *new_struct = malloc(sizeof(StructType));
+
+    new_struct->name = strdup(name);
+    new_struct->field_list = field_list;
+    new_struct->next = global_type_list;
+    global_type_list = new_struct;
 }

@@ -52,12 +52,19 @@ typedef struct FieldInfo {
     struct FieldInfo* next;
 } FieldInfo;
 
+// 전역으로 선언된 구조체 정보 저장하는 구조체
+typedef struct StructType {
+    char *name;
+    FieldInfo *field_list;
+    struct StructType *next;
+} StructType;
+
 
 
 // extern 키워드를 사용하여 외부에서 접근 가능하도록 선언
 extern SymbolTable *current_scope; //현재 스코프를 가리키는 포인터
 extern ParamList* current_param_list; // 현재 함수의 파라미터 리스트를 가리키는 포인터
-
+extern StructType* global_type_list; // 전역으로 선언된 구조체 정보 저장하는 구조체
 
 /* ========== 함수 선언 ========== */
 // 함수 선언
@@ -76,4 +83,6 @@ void add_param(ParamList* list, const char* name, TypeInfo* type);
 void insert_param_list_to_scope(ParamList* list);
 void error_redeclaration(); 
 FieldInfo* convert_scope_to_filed_list();
+int is_redelcare_struct(const char *name);
+void register_struct_type(const char *name, FieldInfo *field_list);
 #endif

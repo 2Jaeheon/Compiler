@@ -119,16 +119,22 @@ struct_specifier
   : STRUCT ID '{' {
     push_scope();
   } def_list '}' {
-    $$ = malloc(sizeof(TypeInfo));
-    $$->type = TYPE_STRUCT;
-    $$->struct_name = $2;
-    $$->next = NULL;
-    $$->array_size = 0;
-    $$->is_lvalue = 0;
+    if(is_redelcare_struct($2)) {
+      error_redeclaration();
+      $$ = NULL;
+    } else {
+      $$ = malloc(sizeof(TypeInfo));
+      $$->type = TYPE_STRUCT;
+      $$->struct_name = $2;
+      $$->next = NULL;
+      $$->array_size = 0;
+      $$->is_lvalue = 0;
+      /* 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환 */
+      $$->field_list = convert_scope_to_filed_list();
 
-    /* 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환 */
-    $$->field_list = convert_scope_to_filed_list();
-
+      /* 전역 구조체 리스트에 추가(구조체 이름을 키로 사용하여 구조체 정보를 저장) */
+      register_struct_type($2, $$->field_list);
+    }
     /* 스코프 종료 */
     pop_scope();
   }
