@@ -107,8 +107,20 @@ ext_def
     }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' ';' {
-    /* 타입 정보 생성 */
-    if (!insert_symbol($3, $1)) {
+    TypeInfo *base_type = $1;
+    if($2 != NULL) {
+      $2->next = $1;
+      base_type = $2;
+    }
+
+    TypeInfo *array_type = malloc(sizeof(TypeInfo));
+    array_type->type = TYPE_ARRAY;
+    array_type->next = base_type;
+    array_type->is_lvalue = 0;
+    array_type->struct_name = NULL;
+    array_type->array_size = $5;
+    
+    if(!insert_symbol($3, array_type)) {
       error_redeclaration();
     }
   }
@@ -284,8 +296,20 @@ def
     }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' ';' {
-    /* 타입 정보 생성 */
-    if (!insert_symbol($3, $1)) {
+    TypeInfo* base_type = $1;
+    if ($2 != NULL) {
+        $2->next = $1;
+        base_type = $2;
+    }
+
+    TypeInfo* array_type = malloc(sizeof(TypeInfo));
+    array_type->type = TYPE_ARRAY;
+    array_type->array_size = $5;
+    array_type->next = base_type;
+    array_type->is_lvalue = 0;
+    array_type->struct_name = NULL;
+
+    if (!insert_symbol($3, array_type)) {
       error_redeclaration();
     }
   }
@@ -487,9 +511,15 @@ unary
   }
   | STRING {
     $$ = malloc(sizeof(TypeInfo));
-    $$->type = TYPE_INT;
+    $$->type = TYPE_POINTER;
+    $$->next = malloc(sizeof(TypeInfo));
+    $$->next->type = TYPE_CHAR;
+    $$->next->is_lvalue = 0;
+    $$->next->next = NULL;
+    $$->next->struct_name = NULL;
+    $$->next->array_size = 0;
+
     $$->is_lvalue = 0;
-    $$->next = NULL;
     $$->struct_name = NULL;
     $$->array_size = 0;
   }
@@ -563,7 +593,20 @@ unary
       $$ -> is_lvalue = 1;  /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 lvalue로 처리함 */
     }
   }
-  | unary '[' expr ']' 
+  | unary '[' expr ']' {
+    if ($1 == NULL || $3 == NULL) {
+      $$ = NULL;
+    } else if($1->type != TYPE_ARRAY) {
+      error_array();
+      $$ = NULL;
+    } else if($3->type != TYPE_INT) {
+      error_subscript();
+      $$ = NULL;
+    } else {
+      $$ = deep_copy_typeinfo($1->next);
+      $$->is_lvalue = 1;
+    }
+  }
   | unary '.' ID {
     if($1 == NULL) {
       $$ = NULL;

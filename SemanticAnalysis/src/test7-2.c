@@ -6,5 +6,4 @@ int main() {
     *p = 10;
     p = NULL;
     a = NULL;
-    
 }
