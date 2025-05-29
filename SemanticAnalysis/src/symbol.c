@@ -154,16 +154,25 @@ int is_same_type(TypeInfo *type1, TypeInfo *type2) {
 
     // 구조체 타입의 경우에는 구조체 이름을 비교해줘야 함.
     if (type1->type == TYPE_STRUCT) {
-        // 구조체 이름이 없으면, 다른 타입
         if (type1->struct_name == NULL || type2->struct_name == NULL) {
-            // printf("타입 비교 실패: 구조체 이름이 없음\n");
             return 0;
         }
-        // 구조체 이름이 다르면, 다른 타입
-        if (strcmp(type1->struct_name, type2->struct_name) != 0) {
-            // printf("타입 비교 실패: 구조체 이름이 다름\n");
-            return 0;
+        // struct_name이 같으면 ok
+        if (strcmp(type1->struct_name, type2->struct_name) == 0) {
+            return 1;
         }
+        
+        // struct_name이 다르면, 둘 중 하나가 변수 이름 (즉, 심볼테이블에 등록된 구조체 변수)면
+        // 그 변수 타입의 struct_name이 같으면 ok
+        Symbol* s1 = lookup_symbol(type1->struct_name);
+        Symbol* s2 = lookup_symbol(type2->struct_name);
+        if ((s1 && s1->type && s1->type->type == TYPE_STRUCT &&
+             strcmp(s1->type->struct_name, type2->struct_name) == 0) ||
+            (s2 && s2->type && s2->type->type == TYPE_STRUCT &&
+             strcmp(s2->type->struct_name, type1->struct_name) == 0)) {
+            return 1;
+        }
+        return 0;
     }
 
     // 배열 타입의 경우에는 배열의 사이즈를 비교해줘야 함.
@@ -330,18 +339,28 @@ TypeInfo* find_field_type(TypeInfo *struct_type, const char *field_name) {
 
 // 깊은 복사
 TypeInfo* deep_copy_typeinfo(TypeInfo* src) {
-    if(src == NULL) {
-        return NULL;
-    }
-
+    if(src == NULL) return NULL;
     TypeInfo* dst = malloc(sizeof(TypeInfo));
     dst->type = src->type;
     dst->next = deep_copy_typeinfo(src->next);
-    dst->struct_name = src->struct_name ? strdup(src->struct_name) : NULL;
     dst->array_size = src->array_size;
     dst->is_lvalue = src->is_lvalue;
-    dst->field_list = deep_copy_field_list(src->field_list);
 
+    if (src->type == TYPE_STRUCT) {
+        dst->struct_name = src->struct_name ? strdup(src->struct_name) : NULL;
+        StructType* cur = global_type_list;
+        dst->field_list = NULL;
+        while (cur) {
+            if (strcmp(cur->name, dst->struct_name) == 0) {
+                dst->field_list = cur->field_list;
+                break;
+            }
+            cur = cur->next;
+        }
+    } else {
+        dst->struct_name = NULL;
+        dst->field_list = deep_copy_field_list(src->field_list);
+    }
     return dst;
 }
 
@@ -408,4 +427,75 @@ void insert_func_info(char* name, TypeInfo* return_type, ParamList* param_list) 
     new_func->param_list = param_list;
     new_func->next = global_func_list;
     global_func_list = new_func;
+}
+
+// 함수 정보 탐색
+FuncInfo* find_func_info(const char* name) {
+    // 함수 리스트의 첫 노드
+    FuncInfo* current = global_func_list;
+    // 함수 리스트를 순회하면서 함수 이름이 일치하는지 확인
+    while (current) {
+        if (strcmp(current->name, name) == 0) { // 함수 이름이 일치하면, 함수 정보 반환
+            return current;
+        }
+        // 다음 함수로 이동
+        current = current->next;
+    }
+    // 함수 이름이 일치하지 않으면, NULL 반환
+    return NULL;
+}
+
+// 인자 리스트 생성
+ParamList* create_arg_list(TypeInfo* type) {
+    // 인자 리스트 생성
+    ParamList* list = create_param_list();
+
+    // 인자 리스트가 비어있지 않으면, 타입을 추가
+    if (type != NULL) {
+        add_arg(list, type);
+    }
+
+    // 인자 리스트 반환
+    return list;
+}
+
+// 인자 리스트에 타입 추가
+int add_arg(ParamList* list, TypeInfo* type) {
+    // 인자 노드 메모리 할당
+    ParamNode* node = malloc(sizeof(ParamNode));
+    node->type = deep_copy_typeinfo(type);
+    node->name = NULL;
+    node->next = NULL;
+
+    // 인자 리스트가 비어있으면, 첫 노드로 추가
+    if (!list->head) {
+        list->head = list->tail = node;
+    } else { // 인자 리스트가 비어있지 않으면, 마지막 노드에 추가
+        list->tail->next = node;
+        list->tail = node;
+    }
+
+    // 성공 반환
+    return 1;
+}
+
+// 함수 선언부의 매개변수 리스트와 호출부의 인자 리스트가 호환되는지 검사
+int is_compatible_arguments(ParamList* declared, ParamList* args) {
+    // 선언부 매개변수 리스트의 첫 노드
+    ParamNode *p1 = declared ? declared->head : NULL;  
+    // 호출부 인자 리스트의 첫 노드
+    ParamNode *p2 = args ? args->head : NULL;        
+    // 두 리스트를 순회하면서
+    while (p1 && p2) {                               
+        // 타입이 일치하지 않으면
+        if (!is_same_type(p1->type, p2->type))      
+            return 0;            
+
+        // 다음 노드로 이동
+        p1 = p1->next;                               
+        p2 = p2->next;
+    }
+
+    // 두 리스트의 길이가 같아야 호환됨
+    return (p1 == NULL && p2 == NULL);               
 }

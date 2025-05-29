@@ -80,7 +80,7 @@ void error_addressof(void);
 %type<typeInfo> func_decl
 %type<paramList> param_list param_decl
 %type<typeInfo> pointers
-
+%type<paramList> args
 /* Grammar rules */
 %%
 program
@@ -163,7 +163,7 @@ struct_specifier
     } else {
       $$ = malloc(sizeof(TypeInfo));
       $$->type = TYPE_STRUCT;
-      $$->struct_name = $2;
+      $$->struct_name = strdup($2);
       $$->next = NULL;
       $$->array_size = 0;
       $$->is_lvalue = 0;
@@ -183,7 +183,7 @@ struct_specifier
       if(strcmp(current->name, $2) == 0) {
         $$ = malloc(sizeof(TypeInfo));
         $$->type = TYPE_STRUCT;
-        $$->struct_name = $2;
+        $$->struct_name = strdup($2);
         $$->next = NULL;
         $$->array_size = 0;
         $$->is_lvalue = 0;
@@ -279,8 +279,15 @@ param_decl
       error_incomplete();
       $$ = NULL;
     } else {
+      /* 만일 int *a이면 TYPE_POINTER -> TYPE_INT 로 연결되어야 함 */
+      TypeInfo* final_type = $1;
+      if ($2 != NULL) { /* 포인터가 있는 경우 */
+        /* 포인터 타입을 추가함 */
+        $2->next = $1; /* POINTER -> INT 로 연결하는 부분 */
+        final_type = $2; /* $2는 포인터 타입임. 따라서 포인터 타입을 추가함 */
+      }
       $$ = create_param_list();
-      if(!add_param($$, $3, $1)) {
+      if(!add_param($$, $3, final_type)) {
         error_redeclaration();
         $$ = NULL;
       }
@@ -563,14 +570,14 @@ unary
     $$->array_size = 0;
   }
   | ID {
-    /* ID를 사용할 때, 이전에 선언된 적이 있는 지 확인해야함. */
-    Symbol *symbol = lookup_symbol($1);
+    Symbol* symbol = lookup_symbol($1);
     if (!symbol) {
-      error_undeclared();
-      $$ = NULL;
-    } else { 
-      $$ = deep_copy_typeinfo(symbol -> type);
-      $$ -> is_lvalue = 1;
+        error_undeclared();
+        $$ = NULL;
+    } else {
+        $$ = deep_copy_typeinfo(symbol->type);
+        $$->is_lvalue = 1;
+        $$->struct_name = strdup($1);
     }
   }
   | '-' unary %prec '!' {
@@ -647,14 +654,14 @@ unary
     if ($1 == NULL) {
       $$ = NULL;
     } else if($1->type != TYPE_STRUCT) {
-      error_lineno = get_lineno(); // 여기에서 라인번호 기록
+      error_lineno = get_lineno(); /* 여기에서 라인번호 기록 */
       error_incompatible(); 
       $$ = NULL;
     } else {
       TypeInfo *field_type = find_field_type($1, $3);
 
       if(field_type == NULL) {
-        error_lineno = get_lineno(); // 필드 없을 때도 마찬가지
+        error_lineno = get_lineno(); /* 필드 없을 때도 마찬가지 */
         error_member();
         $$ = NULL;
       } else {
@@ -682,8 +689,40 @@ unary
       }
     }
   }
-  | unary '(' args ')' 
-  | unary '(' ')' 
+  | unary '(' args ')' {
+    if ($1 == NULL) {
+        $$ = NULL;
+    } else {
+        FuncInfo* func = find_func_info($1->struct_name); /* struct_name에 함수 이름 저장됨 */
+        if (func == NULL) {
+            error_function();
+            $$ = NULL;
+        } else if (!is_compatible_arguments(func->param_list, $3)) {
+            error_arguments();
+            $$ = NULL;
+        } else {
+            $$ = deep_copy_typeinfo(func->return_type);
+            $$->is_lvalue = 0;
+        }
+    }
+  }
+  | unary '(' ')' {
+    if ($1 == NULL) {
+        $$ = NULL;
+    } else {
+        FuncInfo* func = find_func_info($1->struct_name);
+        if (func == NULL) {
+            error_function();
+            $$ = NULL;
+        } else if (func->param_list != NULL) {
+            error_arguments();
+            $$ = NULL;
+        } else {
+            $$ = deep_copy_typeinfo(func->return_type);
+            $$->is_lvalue = 0;
+        }
+    }
+}
   | SYM_NULL {
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_NULLPTR;
@@ -695,8 +734,22 @@ unary
   ;
 
 args
-  : expr 
-  | args ',' expr 
+  : expr {
+    if ($1 == NULL) {
+      $$ = NULL;
+    } else {
+      $$ = create_param_list();
+      add_arg($$, $1);
+    }
+  }
+  | args ',' expr {
+    if ($1 == NULL || $3 == NULL) {
+        $$ = NULL;
+    } else {
+        $$ = $1;
+        add_arg($$, $3);
+    }
+  }
   ;
 
 %%

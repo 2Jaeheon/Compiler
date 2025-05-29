@@ -106,5 +106,9 @@ int is_func_declared(char* name);
 void insert_func_info(char* name, TypeInfo* return_type, ParamList* param_list);
 FuncInfo* find_func_info(const char* name);
 int is_same_param_list(ParamList* p1, ParamList* p2);
+ParamList* create_arg_list(TypeInfo* type);
+int add_arg(ParamList* list, TypeInfo* type);
+void print_param_list(ParamList* list, const char* msg);
+int is_compatible_arguments(ParamList* declared, ParamList* args);
 
 #endif
