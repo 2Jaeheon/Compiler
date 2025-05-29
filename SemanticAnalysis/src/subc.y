@@ -694,14 +694,14 @@ unary
         $$ = NULL;
     } else {
         FuncInfo* func = find_func_info($1->struct_name); /* struct_name에 함수 이름 저장됨 */
-        if (func == NULL) {
-            error_function();
+        if (func == NULL) { /* 함수가 아니라면 */
+            error_function(); /* 에러 메시지를 출력함 */
             $$ = NULL;
         } else if (!is_compatible_arguments(func->param_list, $3)) {
-            error_arguments();
+            error_arguments(); /* 인자 리스트가 호환되지 않으면 에러 메시지를 출력함 */
             $$ = NULL;
         } else {
-            $$ = deep_copy_typeinfo(func->return_type);
+            $$ = deep_copy_typeinfo(func->return_type); /* 함수 반환 타입을 반환함 */
             $$->is_lvalue = 0;
         }
     }
