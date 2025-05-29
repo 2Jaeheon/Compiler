@@ -412,10 +412,16 @@ int is_comparable_type(TypeInfo* type1, TypeInfo* type2) {
 // 함수 중복 선언 확인
 int is_func_declared(char* name) {
     FuncInfo* current = global_func_list;
+    // 함수 리스트를 순회하면서 함수 이름이 일치하는지 확인
     while (current != NULL) {
-        if (strcmp(current->name, name) == 0) return 1;
+        if (strcmp(current->name, name) == 0) { // 함수 이름이 일치하면, 1 반환
+            return 1;
+        }
+        // 다음 함수로 이동
         current = current->next;
     }
+    
+    // 함수 이름이 일치하지 않으면, 0 반환
     return 0;
 }
 
