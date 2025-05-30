@@ -128,6 +128,7 @@ ext_def
     array_type->is_lvalue = 0;
     array_type->struct_name = NULL;
     array_type->array_size = $5; // INTEGER_CONST를 통해서 배열의 크기를 저장
+    array_type->field_list = NULL;
 
     // 심볼 테이블에 배열 타입 추가
     if(!insert_symbol($3, array_type)) {
@@ -158,6 +159,7 @@ type_specifier
     $$->struct_name = NULL;
     $$->array_size = 0;
     $$->is_lvalue = 0;
+    $$->field_list = NULL;
   }
   | struct_specifier 
   ;
@@ -287,6 +289,7 @@ pointers
     $$->is_lvalue = 0;
     $$->struct_name = NULL;
     $$->array_size = 0;
+    $$->field_list = NULL;
   }
   | %empty {
     // 파라미터 리스트가 없는 경우 에러 발생
@@ -373,7 +376,7 @@ def
       $2->next = $1;
       final_type = $2;
     }
-
+    
     // 변수 선언 체크
     if(final_type == NULL) { // 타입 정보가 없는 경우 에러 발생
       error_incomplete();
@@ -400,6 +403,7 @@ def
     array_type->next = base_type; // 배열 타입을 설정 (기본 타입을 저장)
     array_type->is_lvalue = 0; // 배열 타입은 lvalue가 아님
     array_type->struct_name = NULL;
+    array_type->field_list = NULL;
 
     // 배열 타입 선언 체크
     if (!insert_symbol($3, array_type)) {
@@ -618,6 +622,7 @@ unary
     $$->next = NULL;
     $$->struct_name = NULL;
     $$->array_size = 0;
+    $$->field_list = NULL;
   }
   | CHAR_CONST {
     // 문자 상수 타입 생성
@@ -627,6 +632,7 @@ unary
     $$->next = NULL;
     $$->struct_name = NULL;
     $$->array_size = 0;
+    $$->field_list = NULL;
   }
   | STRING {
     // 문자열 타입 생성
@@ -638,10 +644,11 @@ unary
     $$->next->next = NULL;
     $$->next->struct_name = NULL;
     $$->next->array_size = 0;
-
+    $$->next->field_list = NULL;
     $$->is_lvalue = 0;
     $$->struct_name = NULL;
     $$->array_size = 0;
+    $$->field_list = NULL;
   }
   | ID {
     // 심볼 테이블에서 타입 정보를 찾음
@@ -775,6 +782,7 @@ unary
       $$->is_lvalue = 0;
       $$->struct_name = NULL;
       $$->array_size = 0;
+      $$->field_list = NULL;
     }
 }
   | '*' unary %prec '!' {
@@ -920,6 +928,7 @@ unary
     $$->is_lvalue = 0;
     $$->struct_name = NULL;
     $$->array_size = 0;
+    $$->field_list = NULL;
   }
   ;
 

@@ -8,7 +8,7 @@ LEX = flex
 YACC = bison
 
 CFLAGS = -g
-#CFLAGS = -fsanitize=address -static-libasan -g
+CFLAGS = -fsanitize=address -static-libasan -g
 LDFLAGS = -lfl 
 YACCFLAGCS = -vd
 
