@@ -218,43 +218,59 @@ struct_specifier
 
 func_decl
   : type_specifier pointers ID '(' ')' {
+    // 함수 선언 규칙
     TypeInfo* final_type = $1;
+    
+    // pointer가 있으면 pointer 타입을 추가함.
     if($2 != NULL) {
       $2->next = $1;
       final_type = $2;
     }
 
+    // 함수 반환 타입 설정
     current_function_return_type = final_type;
 
-    if(!insert_symbol($3, final_type)) {
-      error_redeclaration();
-
-      $$ = NULL;
-    } else if(is_func_declared($3)) {
+    // 함수 선언 체크
+    if(!insert_symbol($3, final_type)) { // 함수가 선언이 가능한지를 체크
+      // 함수가 이미 선언되어 있는 경우 에러 발생
       error_redeclaration();
       $$ = NULL;
-    } else {
+    } else if(is_func_declared($3)) { // 함수 재선언 체크
+      // 함수가 이미 선언되어 있는 경우 에러 발생
+      error_redeclaration();
+      $$ = NULL;
+    } else { // 함수 선언 추가
+      // 함수 추가
       insert_func_info($3, final_type, NULL);
       $$ = NULL;
     }
   }
   | type_specifier pointers ID '(' param_list ')' {
+    // 함수 선언 규칙
     TypeInfo* final_type = $1;
+    
+    // pointer가 있으면 pointer 타입을 추가함.
     if ($2 != NULL) {
       $2->next = $1;
       final_type = $2;
     }
 
+    // 함수 반환 타입 설정
     current_function_return_type = final_type;
 
+    // 함수 파라미터 리스트 설정
     current_param_list = $5;
 
-    if (is_func_declared($3)) {
+    // 함수 선언 체크
+    if (is_func_declared($3)) { // 함수 재선언 체크
+      // 함수가 이미 선언되어 있는 경우 에러 발생
       error_redeclaration();
       $$ = NULL;
     } else {
+      // 함수 추가
       insert_func_info($3, final_type, $5);
-      if (!insert_symbol($3, final_type)) {
+      if (!insert_symbol($3, final_type)) { // 함수가 선언이 가능한지를 체크
+        // 함수가 이미 선언되어 있는 경우 에러 발생
         error_redeclaration();
       }
       $$ = NULL;
@@ -264,6 +280,7 @@ func_decl
 
 pointers
   : '*' {
+    // 포인터 타입 생성
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_POINTER;
     $$->next = NULL;
@@ -272,6 +289,7 @@ pointers
     $$->array_size = 0;
   }
   | %empty {
+    // 파라미터 리스트가 없는 경우 에러 발생
     $$ = NULL;
   }
   ;
@@ -281,6 +299,7 @@ param_list
     $$ = $1;
   }
   | param_list ',' param_decl {
+    // 파라미터 리스트가 있는 경우 파라미터 추가
     if ($1 != NULL && $3 != NULL) {
       $1->tail->next = $3->head;
       $1->tail = $3->tail;
@@ -291,34 +310,39 @@ param_list
 
 param_decl 
   : type_specifier pointers ID {
+    // 파라미터 타입 설정
     if ($1 == NULL) {
       error_incomplete();
       $$ = NULL;
     } else {
-      /* 만일 int *a이면 TYPE_POINTER -> TYPE_INT 로 연결되어야 함 */
+      // 파라미터 타입 설정
       TypeInfo* final_type = $1;
-      if ($2 != NULL) { /* 포인터가 있는 경우 */
-        /* 포인터 타입을 추가함 */
+      if ($2 != NULL) { // 포인터가 있는 경우
+        // 포인터 타입을 추가함
         $2->next = $1; /* POINTER -> INT 로 연결하는 부분 */
-        final_type = $2; /* $2는 포인터 타입임. 따라서 포인터 타입을 추가함 */
+        final_type = $2; // $2는 포인터 타입임. 따라서 포인터 타입을 추가함
       }
-      $$ = create_param_list();
+      $$ = create_param_list(); // 파라미터 리스트 생성
       if(!add_param($$, $3, final_type)) {
+        // 파라미터 추가 에러 발생
         error_redeclaration();
         $$ = NULL;
       }
     }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' {
+    // 만일 int *a[10] 이면 TYPE_POINTER -> TYPE_ARRAY -> TYPE_INT 로 연결되어야 함.
     if ($1 == NULL) {
+      // 타입 정보가 없는 경우 에러 발생
       error_incomplete();
       $$ = NULL;
-    } else {
-      TypeInfo* param_type = deep_copy_typeinfo($1);
-      param_type -> array_size = $5;
+    } else { // 파라미터 타입 설정
+      TypeInfo* param_type = deep_copy_typeinfo($1); // 파라미터 타입 복사
+      param_type -> array_size = $5; // 파라미터 타입 배열 크기 설정
 
-      $$ = create_param_list();
+      $$ = create_param_list(); // 파라미터 리스트 생성
       if(!add_param($$, $3, param_type)) {
+        // 재선언 에러 발생
         error_redeclaration();
         $$ = NULL;
       }
@@ -333,33 +357,45 @@ def_list
 
 def
   : type_specifier pointers ID ';' {
+    // 변수 선언 규칙
     TypeInfo* final_type = $1;
+
+    // pointer가 있으면 pointer 타입을 추가함.
     if($2 != NULL) {
       $2->next = $1;
       final_type = $2;
     }
 
-    if(final_type == NULL) {
+    // 변수 선언 체크
+    if(final_type == NULL) { // 타입 정보가 없는 경우 에러 발생
       error_incomplete();
-    } else if (!insert_symbol($3, final_type)) {
+    } else if (!insert_symbol($3, final_type)) { // 변수 선언 체크
+      // 변수가 이미 선언되어 있는 경우 에러 발생
       error_redeclaration();
     }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' ';' {
+    // 배열 선언 규칙
     TypeInfo* base_type = $1;
+
+    // pointer가 있으면 pointer 타입을 추가함.
     if ($2 != NULL) {
         $2->next = $1;
         base_type = $2;
     }
 
+    // 배열 타입 생성
     TypeInfo* array_type = malloc(sizeof(TypeInfo));
+    // 배열 타입 설정
     array_type->type = TYPE_ARRAY;
-    array_type->array_size = $5;
-    array_type->next = base_type;
-    array_type->is_lvalue = 0;
+    array_type->array_size = $5; // 배열 크기 설정
+    array_type->next = base_type; // 배열 타입을 설정 (기본 타입을 저장)
+    array_type->is_lvalue = 0; // 배열 타입은 lvalue가 아님
     array_type->struct_name = NULL;
 
+    // 배열 타입 선언 체크
     if (!insert_symbol($3, array_type)) {
+      // 배열 타입이 이미 선언되어 있는 경우 에러 발생
       error_redeclaration();
     }
   }
@@ -367,18 +403,23 @@ def
 
 compound_stmt
   : '{' {
+    // 스코프 추가
     push_scope();
+    // 파라미터 리스트가 있는 경우 파라미터 추가
     if (current_param_list != NULL) {
+      // 파라미터 리스트를 순회하며 파라미터 추가
         ParamNode* cur = current_param_list->head;
         while (cur != NULL) {
           if (!insert_symbol(cur->name, cur->type)) {
+            // 파라미터가 이미 선언되어 있는 경우 에러 발생
             error_redeclaration();
           }
           cur = cur->next;
         }
-        current_param_list = NULL;
+        current_param_list = NULL; // 파라미터 리스트 초기화
       }
   } def_list stmt_list '}' {
+    // 스코프 종료
     pop_scope();
   }
   ;
@@ -391,8 +432,10 @@ stmt_list
 stmt
   : expr ';' 
   | RETURN expr ';' {
+    // 반환 타입 체크
     if ($2 != NULL && current_function_return_type != NULL) {
         if (!is_same_type($2, current_function_return_type)) {
+            // 반환 타입이 일치하지 않는 경우 에러 발생
             error_return();
         }
     }
@@ -418,18 +461,18 @@ expr
   : unary '=' expr { /* 대입문을 분석할 때, 왼쪽과 오른쪽의 타입 검사 및 할당 가능한지를 체크하는 부분
   만약 a가 선언되지 않았는데, lookup_symbol()을 통해 타입을 찾으려고 하면, 에러가 발생함.
   따라서 이를 통해서 둘 중 하나라도 문제가 있는 경우에는 NULL을 반환하게 한다. */
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if(!is_lvalue($1)) {
+    } else if(!is_lvalue($1)) { // 왼쪽 피연산자가 lvalue가 아닌 경우
       error_assignable(); /* 할당이 불가능 함 */
       $$ = NULL;
-    } else if($3->type == TYPE_NULLPTR && $1->type != TYPE_POINTER) {
+    } else if($3->type == TYPE_NULLPTR && $1->type != TYPE_POINTER) { // 오른쪽 피연산자가 NULL인 경우
       error_null();
       $$ = NULL;
-    } else if(!is_same_type($1, $3)) {
+    } else if(!is_same_type($1, $3)) { // 피연산자 타입이 일치하지 않는 경우
       error_incompatible();
       $$ = NULL;
-    } else {
+    } else { // 정상적인 경우
       $$ = $1;
     }
   }
@@ -440,9 +483,9 @@ expr
 
 binary
   : binary RELOP binary {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if (!is_comparable_type($1, $3)) {
+    } else if (!is_comparable_type($1, $3)) { // 피연산자 타입이 비교 가능한 타입이 아닌 경우
       error_comparable();
       $$ = NULL;
     } else {
@@ -455,9 +498,9 @@ binary
     }
   }
   | binary EQUOP binary {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if (!is_comparable_type($1, $3)) {
+    } else if (!is_comparable_type($1, $3)) { // 피연산자 타입이 비교 가능한 타입이 아닌 경우
       error_comparable();
       $$ = NULL;
     } else {
@@ -470,9 +513,9 @@ binary
     }
   }
   | binary '+' binary {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) { // 피연산자 타입이 산술 타입이 아닌 경우
       error_binary();
       $$ = NULL;
     } else {
@@ -480,9 +523,9 @@ binary
     }
   }
   | binary '-' binary  {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) { // 피연산자 타입이 산술 타입이 아닌 경우
       error_binary();
       $$ = NULL;
     } else {
@@ -500,9 +543,9 @@ binary
     }
   }
   | binary '/' binary {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) { // 피연산자 타입이 산술 타입이 아닌 경우
       error_binary();
       $$ = NULL;
     } else {
@@ -510,9 +553,9 @@ binary
     }
   }
   | binary '%' binary {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) {
+    } else if(!is_arithmetic_type($1) || !is_arithmetic_type($3)) { // 피연산자 타입이 산술 타입이 아닌 경우
       error_binary();
       $$ = NULL;
     } else {
@@ -523,9 +566,9 @@ binary
     $$ = $1;
   }
   | binary LOGICAL_AND binary  {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if (!is_boolean_type($1) || !is_boolean_type($3)) {
+    } else if (!is_boolean_type($1) || !is_boolean_type($3)) { // 피연산자 타입이 불리언 타입이 아닌 경우
       error_binary();
       $$ = NULL;
     } else {
@@ -538,10 +581,12 @@ binary
     }
   }
   | binary LOGICAL_OR binary {
-    if ($1 == NULL || $3 == NULL) {
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else {
-      /* 타입을 검사함 */
+    } else if (!is_boolean_type($1) || !is_boolean_type($3)) { // 피연산자 타입이 불리언 타입이 아닌 경우
+      error_binary();
+      $$ = NULL;
+    } else { // 정상적인 경우
       $$ = $1;
     }
   }
@@ -550,12 +595,15 @@ binary
 
 unary
   : '(' expr ')' {
+    // expr을 괄호로 감싸면 타입 정보를 그대로 넘김
     $$ = $2;
   }
   | '(' unary ')' {
+    // 피연산자를 괄호로 감싸면 타입 정보를 그대로 넘김
     $$ = $2;
   }
   | INTEGER_CONST {
+    // 정수 상수 타입 생성
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_INT;
     $$->is_lvalue = 0;
@@ -564,6 +612,7 @@ unary
     $$->array_size = 0;
   }
   | CHAR_CONST {
+    // 문자 상수 타입 생성
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_CHAR;
     $$->is_lvalue = 0;
@@ -572,6 +621,7 @@ unary
     $$->array_size = 0;
   }
   | STRING {
+    // 문자열 타입 생성
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_POINTER;
     $$->next = malloc(sizeof(TypeInfo));
@@ -599,7 +649,7 @@ unary
     } else { // 심볼이 있는 경우
         // 피연산자의 타입 정보를 복사
         $$ = deep_copy_typeinfo(symbol->type);
-        
+
         // 배열이면 lvalue가 아님!
         // lvalue는 대입 연산자의 왼쪽에 올 수 있는 값을 의미
         // 예를 들어 변수는 lvalue가 될 수 있지만, 상수나 표현식의 결과는 lvalue가 될 수 없음
@@ -617,9 +667,9 @@ unary
     }
 }
   | '-' unary %prec '!' {
-    if ($2 == NULL){
+    if ($2 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else {
+    } else { // 정상적인 경우
       $$ = $2;
     }
   }
@@ -743,63 +793,75 @@ unary
     }
   }
   | unary '[' expr ']' {
+    // 배열 인덱스 연산 규칙
     if ($1 == NULL || $3 == NULL) {
       $$ = NULL;
-    } else if($1->type != TYPE_ARRAY) {
+    } else if($1->type != TYPE_ARRAY) { // 피연산자가 배열이 아닌 경우
       error_array();
       $$ = NULL;
-    } else if($3->type != TYPE_INT) {
+    } else if($3->type != TYPE_INT) { // 피연산자가 정수가 아닌 경우
       error_subscript();
       $$ = NULL;
-    } else {
+    } else { // 정상적인 경우
       $$ = deep_copy_typeinfo($1->next);
       $$->is_lvalue = 1;
     }
   }
   | unary '.' ID {
-    if ($1 == NULL) {
+    // 구조체 멤버 접근 규칙
+    if ($1 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if($1->type != TYPE_STRUCT) {
+    } else if($1->type != TYPE_STRUCT) { // 피연산자가 구조체가 아닌 경우
       error_lineno = get_lineno(); /* 여기에서 라인번호 기록 */
+      // 타입 호환 에러 발생
       error_incompatible(); 
       $$ = NULL;
-    } else {
+    } else { // 정상적인 경우
       TypeInfo *field_type = find_field_type($1, $3);
-
+      // 필드 없을 때도 마찬가지
       if(field_type == NULL) {
-        error_lineno = get_lineno(); /* 필드 없을 때도 마찬가지 */
+        error_lineno = get_lineno();
+        // 필드 없을 때도 마찬가지
         error_member();
         $$ = NULL;
       } else {
+        // 필드 타입 복사
         $$ = deep_copy_typeinfo(field_type);
         $$->is_lvalue = 1;
       }
     }
   }
   | unary STRUCTOP ID {
-    if($1 == NULL) {
+    // 구조체 포인터 멤버 접근 규칙
+    if($1 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else if($1->type != TYPE_POINTER || $1->next->type != TYPE_STRUCT) {
+    } else if($1->type != TYPE_POINTER || $1->next->type != TYPE_STRUCT) { // 피연산자가 구조체 포인터가 아닌 경우
       error_strurctp(); /* 구조체 포인터가 아니라면 에러 메시지를 출력함 */
       $$ = NULL;
     } else {
+      // 구조체 타입 정보 복사
       TypeInfo *struct_type = $1->next;
+      // 필드 타입 찾기
       TypeInfo *field_type = find_field_type(struct_type, $3);
 
+      // 필드가 없으면 에러 발생
       if(field_type == NULL) {
         error_member();
         $$ = NULL;
       } else {
+        // 필드 타입 복사
         $$ = deep_copy_typeinfo(field_type);
         $$->is_lvalue = 1;
       }
     }
   }
   | unary '(' args ')' {
-    if ($1 == NULL) {
-        $$ = NULL;
+    // 함수 호출 규칙
+    if ($1 == NULL) { // 피연산자가 NULL인 경우
+      $$ = NULL;
     } else {
-        FuncInfo* func = find_func_info($1->struct_name); /* struct_name에 함수 이름 저장됨 */
+      // 함수 타입 정보 찾기
+      FuncInfo* func = find_func_info($1->struct_name); /* struct_name에 함수 이름 저장됨 */
         if (func == NULL) { /* 함수가 아니라면 */
             error_function(); /* 에러 메시지를 출력함 */
             $$ = NULL;
@@ -813,23 +875,27 @@ unary
     }
   }
   | unary '(' ')' {
-    if ($1 == NULL) {
-        $$ = NULL;
+    // 함수 호출 규칙
+    if ($1 == NULL) { // 피연산자가 NULL인 경우
+      $$ = NULL;
     } else {
+      // 함수 타입 정보 찾기
         FuncInfo* func = find_func_info($1->struct_name);
-        if (func == NULL) {
-            error_function();
-            $$ = NULL;
-        } else if (func->param_list != NULL) {
-            error_arguments();
-            $$ = NULL;
-        } else {
-            $$ = deep_copy_typeinfo(func->return_type);
-            $$->is_lvalue = 0;
+      if (func == NULL) { // 함수가 없는 경우
+        error_function();
+        $$ = NULL;
+      } else if (func->param_list != NULL) { // 인자 리스트가 호환되지 않는 경우
+        error_arguments();
+        $$ = NULL;
+      } else { // 정상적인 경우
+          // 함수 반환 타입 복사
+          $$ = deep_copy_typeinfo(func->return_type);
+          $$->is_lvalue = 0;
         }
     }
 }
   | SYM_NULL {
+    // NULL 타입 생성
     $$ = malloc(sizeof(TypeInfo));
     $$->type = TYPE_NULLPTR;
     $$->next = NULL;
@@ -841,18 +907,24 @@ unary
 
 args
   : expr {
-    if ($1 == NULL) {
+    // 함수 호출 시 인자 리스트 생성
+    // 인자 리스트 생성
+    if ($1 == NULL) { // 피연산자가 NULL인 경우
       $$ = NULL;
-    } else {
+    } else { // 정상적인 경우
       $$ = create_param_list();
+      // 인자 리스트에 피연산자 추가
       add_arg($$, $1);
     }
   }
   | args ',' expr {
-    if ($1 == NULL || $3 == NULL) {
-        $$ = NULL;
-    } else {
+    // 함수 호출 시 인자 리스트 생성
+    // 인자 리스트 생성
+    if ($1 == NULL || $3 == NULL) { // 피연산자가 NULL인 경우
+      $$ = NULL;
+    } else { // 정상적인 경우
         $$ = $1;
+        // 인자 리스트에 피연산자 추가
         add_arg($$, $3);
     }
   }
