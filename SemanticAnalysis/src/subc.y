@@ -184,7 +184,7 @@ struct_specifier
       $$->array_size = 0;
       $$->is_lvalue = 0;
       /* 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환 */
-      $$->field_list = convert_scope_to_filed_list();
+      $$->field_list = convert_scope_to_field_list();
       /* 전역 구조체 리스트에 추가(구조체 이름을 키로 사용하여 구조체 정보를 저장) */
       register_struct_type($2, $$->field_list);
     }
@@ -868,6 +868,9 @@ unary
         } else if (!is_compatible_arguments(func->param_list, $3)) {
             error_arguments(); /* 인자 리스트가 호환되지 않으면 에러 메시지를 출력함 */
             $$ = NULL;
+        } else if (func->param_list == NULL) { // 인자 리스트가 없는 경우 에러 발생
+          error_function();
+          $$ = NULL;
         } else {
             $$ = deep_copy_typeinfo(func->return_type); /* 함수 반환 타입을 반환함 */
             $$->is_lvalue = 0;
@@ -875,25 +878,32 @@ unary
     }
   }
   | unary '(' ')' {
-    // 함수 호출 규칙
-    if ($1 == NULL) { // 피연산자가 NULL인 경우
+    // 인자가 없는 함수 호출 규칙
+    if ($1 == NULL || $1->struct_name == NULL) {
+      error_function();
       $$ = NULL;
-    } else {
+    } else { // 정상적인 경우
       // 함수 타입 정보 찾기
-        FuncInfo* func = find_func_info($1->struct_name);
-      if (func == NULL) { // 함수가 없는 경우
-        error_function();
+      FuncInfo* func = find_func_info($1->struct_name);
+
+      // 함수가 없거나 반환 타입이 없는 경우 에러 발생
+      if (func == NULL || func->return_type == NULL) {
+        error_function(); 
         $$ = NULL;
-      } else if (func->param_list != NULL) { // 인자 리스트가 호환되지 않는 경우
+      } 
+
+      // 인자 리스트가 있는 경우 에러 발생
+      else if (func->param_list != NULL) {
         error_arguments();
         $$ = NULL;
-      } else { // 정상적인 경우
-          // 함수 반환 타입 복사
-          $$ = deep_copy_typeinfo(func->return_type);
-          $$->is_lvalue = 0;
-        }
+      }
+
+      else { // 정상적인 경우
+        $$ = deep_copy_typeinfo(func->return_type);
+        $$->is_lvalue = 0;
+      }
     }
-}
+  }
   | SYM_NULL {
     // NULL 타입 생성
     $$ = malloc(sizeof(TypeInfo));

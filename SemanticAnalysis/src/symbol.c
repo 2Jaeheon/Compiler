@@ -250,7 +250,7 @@ void insert_param_list_to_scope(ParamList* list){
 }
 
 // 스코프 내의 모든 심볼들을 fieldInfo 리스트로 변환함.
-FieldInfo* convert_scope_to_filed_list() {
+FieldInfo* convert_scope_to_field_list() {
     if (current_scope == NULL) {
         return NULL;
     }

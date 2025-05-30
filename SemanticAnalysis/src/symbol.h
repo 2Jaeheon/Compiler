@@ -93,7 +93,7 @@ ParamList* create_param_list();
 int add_param(ParamList* list, const char* name, TypeInfo* type);
 void insert_param_list_to_scope(ParamList* list);
 void error_redeclaration(); 
-FieldInfo* convert_scope_to_filed_list();
+FieldInfo* convert_scope_to_field_list();
 int is_redelcare_struct(const char *name);
 void register_struct_type(const char *name, FieldInfo *field_list);
 TypeInfo* find_field_type(TypeInfo *struct_type, const char *field_name);
