@@ -94,33 +94,44 @@ ext_def_list
 
 ext_def
   : type_specifier pointers ID ';' { 
+    /* 전역 변수 선언 규칙 */
+
+    /* 1. 기본 타입(type_specifier)에 포인터(pointers)를 연결해 최종 타입 생성 */
     TypeInfo* final_type = $1;
     if($2 != NULL) {
       $2->next = $1;
       final_type = $2;
     }
     
+    /* 2. 타입 체크 및 심볼 테이블에 변수 추가 */
     if(final_type == NULL) {
-      error_incomplete();
+      error_incomplete(); /* 불완전한 타입 에러 */
     } else if (!insert_symbol($3, final_type)) {
-      error_redeclaration();
+      error_redeclaration(); /* 변수 재선언 에러 */
     }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' ';' {
-    TypeInfo *base_type = $1;
+    TypeInfo *base_type = $1; /* 배열 타입의 경우, 배열의 기본 타입을 저장 */
+    
+    // 포인터 타입이 있는 경우, 포인터 타입을 추가함.
     if($2 != NULL) {
       $2->next = $1;
       base_type = $2;
     }
 
+    // 배열 타입 생성
     TypeInfo *array_type = malloc(sizeof(TypeInfo));
-    array_type->type = TYPE_ARRAY;
-    array_type->next = base_type;
+    array_type->type = TYPE_ARRAY; // 배열 타입으로 설정
+    array_type->next = base_type; // 배열 타입을 설정 (배열의 기본 타입을 저장 ex_int, char 등)
+
+    // 배열 타입의 경우, lvalue가 아님.
     array_type->is_lvalue = 0;
     array_type->struct_name = NULL;
-    array_type->array_size = $5;
-    
+    array_type->array_size = $5; // INTEGER_CONST를 통해서 배열의 크기를 저장
+
+    // 심볼 테이블에 배열 타입 추가
     if(!insert_symbol($3, array_type)) {
+      // 변수를 재선언함 에러 발생
       error_redeclaration();
     }
   }
@@ -135,13 +146,14 @@ type_specifier
     $$ = malloc(sizeof(TypeInfo));
     /* 타입 정보 초기화 */
     
-    if (strcmp($1, "int") == 0) {
+    if (strcmp($1, "int") == 0) { // int 타입 처리
       $$->type = TYPE_INT;
-    } else if (strcmp($1, "char") == 0) {
+    } else if (strcmp($1, "char") == 0) { // 문자 타입 처리
       $$->type = TYPE_CHAR;
-    } else {
+    } else { // 기본 타입이 아닌 경우, int로 설정
       $$->type = TYPE_INT; 
     }
+    // 타입 정보 초기화
     $$->next = NULL;
     $$->struct_name = NULL;
     $$->array_size = 0;
@@ -152,15 +164,19 @@ type_specifier
 
 struct_specifier
   : STRUCT ID {
+    // error_lineno을 통해서 오류 발생 위치를 저장
     error_lineno = get_lineno();
   }
   '{' {
+    // 스코프 추가
     push_scope();
   } def_list '}' {
+    // 구조체 재선언 체크
     if(is_redelcare_struct($2)) {
       error_redeclaration();
       $$ = NULL;
     } else {
+      // 구조체 타입 생성
       $$ = malloc(sizeof(TypeInfo));
       $$->type = TYPE_STRUCT;
       $$->struct_name = strdup($2);
@@ -570,16 +586,36 @@ unary
     $$->array_size = 0;
   }
   | ID {
-    Symbol* symbol = lookup_symbol($1);
-    if (!symbol) {
+    // 심볼 테이블에서 타입 정보를 찾음
+    Symbol* symbol = lookup_symbol($1); // ID의 타입 정보를 찾음
+    // 여기서 나올 수 있는 것은 심볼이 없는 경우와 심볼이 있는 경우 두 가지 경우가 있음.
+    // 심볼이 없는 경우는 변수가 선언되지 않은 경우임.
+    // 심볼이 있는 경우는 변수가 선언된 경우임.
+    // 따라서 심볼이 없는 경우는 에러 발생하고, 심볼이 있는 경우는 타입 정보를 복사하고, lvalue 여부를 결정함.
+
+    if (!symbol) { // 심볼이 없는 경우 에러 발생
         error_undeclared();
         $$ = NULL;
-    } else {
+    } else { // 심볼이 있는 경우
+        // 피연산자의 타입 정보를 복사
         $$ = deep_copy_typeinfo(symbol->type);
-        $$->is_lvalue = 1;
+        
+        // 배열이면 lvalue가 아님!
+        // lvalue는 대입 연산자의 왼쪽에 올 수 있는 값을 의미
+        // 예를 들어 변수는 lvalue가 될 수 있지만, 상수나 표현식의 결과는 lvalue가 될 수 없음
+        // 즉, int a = 10; 에서 a는 lvalue이고 10은 rvalue임
+        // 포인터를 통한 간접 참조도 lvalue가 될 수 있음
+
+        if ($$->type == TYPE_ARRAY) { // 배열이면 lvalue가 아님
+            $$->is_lvalue = 0;
+        } else { // 배열이 아닌 경우, lvalue로 처리
+            $$->is_lvalue = 1;
+        }
+
+        // 구조체 이름 복사해서 저장
         $$->struct_name = strdup($1);
     }
-  }
+}
   | '-' unary %prec '!' {
     if ($2 == NULL){
       $$ = NULL;
@@ -594,29 +630,87 @@ unary
       $$ = $2;
     }
   }
-  | unary INCOP %prec STRUCTOP 
-  | unary DECOP %prec STRUCTOP 
+  | unary INCOP %prec STRUCTOP { // 후위 증감 연산
+    // 피연산자가 NULL인 경우 즉, 피연산자가 없는 경우
+    if ($1 == NULL) {
+      $$ = NULL;
+    } 
+    // 피연산자가 lvalue가 아닌 경우 에러 발생
+    else if (!is_lvalue($1)) {
+      error_unary();
+      $$ = NULL;
+    } else { // 정상적인 경우
+      $$ = deep_copy_typeinfo($1);
+      $$->is_lvalue = 0; // 후위 증감 연산 결과는 rvalue
+    }
+  }
+  | unary DECOP %prec STRUCTOP { // 후위 감소 연산
+    // 피연산자가 NULL인 경우 즉, 피연산자가 없는 경우
+    if ($1 == NULL) {
+      $$ = NULL;
+    } 
+    // 피연산자가 lvalue가 아닌 경우 에러 발생
+    else if (!is_lvalue($1)) {
+      error_unary();
+      $$ = NULL;
+    } else { // 정상적인 경우
+      // 피연산자의 타입 정보를 복사
+      $$ = deep_copy_typeinfo($1);
+      $$->is_lvalue = 0; // 후위 증감 연산 결과는 rvalue
+    }
+  }
   | INCOP unary %prec '!' {
+    // 피연산자가 NULL인 경우
     if ($2 == NULL) {
       $$ = NULL;
-    } else {
-      $$ = $2;
+    } 
+    // 피연산자가 lvalue가 아닌 경우 에러 발생
+    else if (!is_lvalue($2)) {
+      error_unary();
+      $$ = NULL;
+    } 
+    // 정상적인 경우
+    else {
+      // 피연산자의 타입 정보를 복사
+      $$ = deep_copy_typeinfo($2);
+      $$->is_lvalue = 0; // 전위 증감 연산 결과도 rvalue
     }
   }
   | DECOP unary %prec '!' {
+    // 피연산자가 NULL인 경우
     if ($2 == NULL) {
       $$ = NULL;
-    } else {
-      $$ = $2;
+    } 
+    // 피연산자가 lvalue가 아닌 경우 에러 발생
+    else if (!is_lvalue($2)) {
+      error_unary();
+      $$ = NULL;
+    }
+    // 정상적인 경우
+    else {
+      // 피연산자의 타입 정보를 복사
+      $$ = deep_copy_typeinfo($2);
+      // 전위 감소 연산의 결과는 rvalue
+      $$->is_lvalue = 0;
     }
   }
   | '&' unary {
+    // 피연산자가 NULL인 경우
     if ($2 == NULL) {
       $$ = NULL;
-    } else if(!is_lvalue($2)) {
-      error_addressof();
+    } 
+    // 피연산자가 lvalue가 아닌 경우 에러 발생
+    else if(!is_lvalue($2)) {
+      if ($2->type == TYPE_ARRAY) { // 나눠서 처리해야 에러 메시지가 제대로 출력됨.
+        // 배열 타입의 경우, 주소 연산 에러 발생
+        error_addressof();
+      } else {
+        // 포인터 타입의 경우, 주소 연산 에러 발생
+        error_unary();
+      }
       $$ = NULL;
     } else {
+      // 포인터 타입 생성
       $$ = malloc(sizeof(TypeInfo));
       $$->type = TYPE_POINTER;
       $$->next = deep_copy_typeinfo($2);
@@ -624,16 +718,28 @@ unary
       $$->struct_name = NULL;
       $$->array_size = 0;
     }
-  }
+}
   | '*' unary %prec '!' {
+    // 피연산자가 NULL인 경우
     if ($2 == NULL) {
       $$ = NULL;
-    } else if($2 -> type != TYPE_POINTER) { /* 만일 $2의 타입이 포인터가 아니라면, 에러 메시지를 출력함 */
+    } 
+    // 피연산자가 포인터가 아닌 경우 에러 발생
+    else if($2->type != TYPE_POINTER) {
       error_indirection();
       $$ = NULL;
-    } else {
-      $$ = $2 -> next; /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 포인터의 값을 가지고 있는 타입을 반환함 */
-      $$ -> is_lvalue = 1;  /* 포인터의 경우에는 값을 가지고 있는 것이기 때문에 lvalue로 처리함 */
+    } 
+    // 피연산자가 lvalue가 아닌 경우 에러 발생
+    else if (!is_lvalue($2)) {
+      error_unary();
+      $$ = NULL;
+    } 
+    // 정상적인 경우
+    else { 
+      // 피연산자의 타입 정보를 복사
+      $$ = deep_copy_typeinfo($2->next);
+      // 포인터 타입의 경우, lvalue로 처리
+      $$->is_lvalue = 1;
     }
   }
   | unary '[' expr ']' {
