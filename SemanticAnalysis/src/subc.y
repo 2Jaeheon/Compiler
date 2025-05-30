@@ -331,18 +331,26 @@ param_decl
     }
   }
   | type_specifier pointers ID '[' INTEGER_CONST ']' {
-    // 만일 int *a[10] 이면 TYPE_POINTER -> TYPE_ARRAY -> TYPE_INT 로 연결되어야 함.
     if ($1 == NULL) {
-      // 타입 정보가 없는 경우 에러 발생
       error_incomplete();
       $$ = NULL;
-    } else { // 파라미터 타입 설정
-      TypeInfo* param_type = deep_copy_typeinfo($1); // 파라미터 타입 복사
-      param_type -> array_size = $5; // 파라미터 타입 배열 크기 설정
+    } else {
+      // 기존 타입을 deep_copy
+      TypeInfo* base_type = deep_copy_typeinfo($1);
 
-      $$ = create_param_list(); // 파라미터 리스트 생성
-      if(!add_param($$, $3, param_type)) {
-        // 재선언 에러 발생
+      // 배열 타입 생성
+      TypeInfo* array_type = malloc(sizeof(TypeInfo));
+      array_type->type = TYPE_ARRAY;
+      array_type->array_size = $5;
+      array_type->next = base_type;
+      array_type->is_lvalue = 0;
+      array_type->struct_name = NULL;
+      array_type->field_list = NULL;
+
+      // 파라미터 리스트 생성
+      $$ = create_param_list();
+      // 파라미터 추가
+      if (!add_param($$, $3, array_type)) {
         error_redeclaration();
         $$ = NULL;
       }

@@ -1,11 +1,1 @@
-int a;
-char b;
-int arr[5];
-
-int main() {
-    a();
-    b();
-    arr();
-    10();
-    return 0;
-}
+void foo(int a[5]) { a[0] = 1; }
