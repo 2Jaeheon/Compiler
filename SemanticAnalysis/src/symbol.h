@@ -110,5 +110,11 @@ ParamList* create_arg_list(TypeInfo* type);
 int add_arg(ParamList* list, TypeInfo* type);
 void print_param_list(ParamList* list, const char* msg);
 int is_compatible_arguments(ParamList* declared, ParamList* args);
+void free_symbol(Symbol* symbol);
+void free_struct_type_list(StructType* list);
+void free_func_list(FuncInfo* list);
+void free_type(TypeInfo* type);
+void free_field_list(FieldInfo* field_list);
+void free_param_list(ParamList* list);
 
 #endif

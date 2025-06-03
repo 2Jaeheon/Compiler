@@ -29,24 +29,7 @@ void init_symbol_system() {
     current_scope = create_symbol_table(NULL);
 }
 
-// 심볼 테이블 메모리 해제
-void free_symbol_table(SymbolTable* table) {
-    Symbol* symbol = table -> symbols;
-    // 심볼이 존재하는 동안 반복하면서 메모리 해제
-    while(symbol != NULL) {
-        // 다음 심볼을 가리키는 포인터를 저장
-        Symbol* next = symbol->next;
-        // 심볼의 메모리 해제
-        free(symbol->name);
-        free(symbol->type);
-        free(symbol);
-        
-        // 다음 심볼로 이동
-        symbol = next;
-    }
-    // 심볼 테이블 메모리 해제
-    free(table);
-}
+
 
 // 새로운 스코프를 생성하고 진입
 void push_scope() {
@@ -504,4 +487,139 @@ int is_compatible_arguments(ParamList* declared, ParamList* args) {
 
     // 두 리스트의 길이가 같아야 호환됨
     return (p1 == NULL && p2 == NULL);               
+}
+
+
+
+void free_type(TypeInfo *type) {
+    if (type == NULL) {
+        return ;
+    }
+    
+    // 배열이나 포인터 등과같은 연속된 타입 체인을 해제함.
+    free_type(type->next);
+
+    // 구조체의 경우 구조체 이름 메모리 해제
+    if(type -> struct_name) {
+        free(type->struct_name);
+    }
+
+    // 구조체 타입의 경우 필드 리스트 해제
+    free_field_list(type->field_list);
+
+    // 자기 자신을 해제
+    free(type);
+}
+
+// 구조체 내부의 필드 정보를 해제함.
+void free_field_list(FieldInfo *field_list) {
+    // 필드는 계속해서 연결되어있음. 따라서 이를 하나씩 해제해줘야함
+    // 필드 리스트가 비어있을 때까지 반복
+    while(field_list) {
+        // 다음 필드 정보를 저장
+        FieldInfo *next = field_list->next;
+        
+        // 필드 이름 해제
+        if (field_list->name){
+            free(field_list->name);
+        }
+
+        // 필드 타입 해제
+        free_type(field_list->type);
+
+        // 현재 필드를 해제
+        free(field_list);
+
+        field_list = next;
+    }
+}
+
+// 파라미터 리스트 내부의 파라미터 노드들을 해제하는 함수
+void free_param_list(ParamList* list) {
+    if (list == NULL) {
+        return ;
+    }
+
+    // 파라미터 리스트의 첫 노드부터 순회하면서 해제
+    ParamNode* current = list->head;
+
+    while(current) {
+        ParamNode* next = current->next;
+
+        // 파라미터 이름 해제
+        if(current->name) {
+            free(current->name);
+        }
+
+        // 파라미터 타입 해제
+        if(current->type) {
+            free_type(current->type);
+        }
+
+        // 현재 노드 해제
+        free(current);
+        // 다음 노드로 이동
+        current = next;
+    }
+
+    // 파라미터 리스트 해제
+    free(list);
+}
+
+void free_symbol(Symbol* symbol) {
+    while(symbol) {
+        Symbol* next = symbol->next;
+
+        if(symbol->name) {
+            free(symbol->name);
+        }
+
+        free_type(symbol->type);
+        
+        // 심볼 해제
+        free(symbol);
+        symbol = next;
+    }
+}
+
+void free_symbol_table(SymbolTable* table) {
+    if (table == NULL) {
+        return ;
+    }
+
+    // 심볼테이블 내부의 심볼 해제
+    free_symbol(table->symbols);
+
+    // 테이블 해제
+    free(table);
+}
+
+void free_struct_type_list(StructType* list){
+    while(list) {
+        StructType* next = list->next;
+
+        if(list->name) {
+            free(list->name);
+        }
+
+        free_field_list(list->field_list);
+        free(list);
+        list = next;
+    }
+}
+
+void free_func_list(FuncInfo* list) {
+    while(list) {
+        FuncInfo* next = list->next;
+
+        if(list->name) {
+            free(list->name);
+        }
+
+        free_type(list->return_type);
+        free_param_list(list->param_list);
+
+        free(list);
+        list = next;
+    }
 }

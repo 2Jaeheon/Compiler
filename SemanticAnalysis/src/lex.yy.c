@@ -2029,6 +2029,10 @@ int main(int argc, char* argv[]) {
   yyparse();
   fclose(yyin);
 
+  free_symbol_table(current_scope);
+  free_struct_type_list(global_type_list);
+  free_func_list(global_func_list);
+
   return 0;
 }
 
