@@ -335,7 +335,7 @@ TypeInfo* deep_copy_typeinfo(TypeInfo* src) {
         dst->field_list = NULL;
         while (cur) {
             if (strcmp(cur->name, dst->struct_name) == 0) {
-                dst->field_list = cur->field_list;
+                dst->field_list = deep_copy_field_list(cur->field_list);
                 break;
             }
             cur = cur->next;
